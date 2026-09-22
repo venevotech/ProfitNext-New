@@ -1,0 +1,6 @@
+{
+  "name": "ProfitNext — Digital Apps & Course Platform",
+  "description": "ProfitNext is a premium digital commerce and course learning platform with instant access to Course, Gemini Pro, and CapCut Pro for 399 Taka, plus affiliate partner earning system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
