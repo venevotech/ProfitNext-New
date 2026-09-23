@@ -24,6 +24,16 @@ import { AdminPanel } from './modules/admin/AdminPanel.tsx';
 import { detectReferralCode } from './services/tracking.ts';
 import { forwardOrderToTelegram } from './services/telegram.ts';
 import { isAdminLoggedIn, setAdminLoggedIn, getActiveAffiliateId, setActiveAffiliateId, getActivePartnerId, setActivePartnerId } from './services/auth.ts';
+import { 
+  auth, 
+  loginWithGoogle, 
+  logoutUser, 
+  testConnection, 
+  loadAppStateFromFirestore, 
+  saveOrderToFirestore,
+  saveAffiliateToFirestore
+} from './services/firebase.ts';
+import { onAuthStateChanged, User } from 'firebase/auth';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>(() => loadAppState());
@@ -33,6 +43,9 @@ export default function App() {
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [language, setLanguage] = useState<'bn' | 'en'>('bn');
+
+  // Firebase User Auth State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   // Video modal
   const [videoModal, setVideoModal] = useState<{ isOpen: boolean; videoId: string; title?: string }>({
@@ -63,10 +76,60 @@ export default function App() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Sync state to localStorage
+  // Sync state to localStorage & in-memory
   const handleUpdateState = (newState: AppState) => {
     setAppState(newState);
     saveAppState(newState);
+  };
+
+  // Firebase initialization & connection test
+  useEffect(() => {
+    testConnection();
+
+    // Listen to Firebase Auth state
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user && user.email === 'newlifebegin2026@gmail.com') {
+        setAdminAuth(true);
+        setAdminLoggedIn(true);
+      }
+    });
+
+    // Load persisted data from Firestore
+    loadAppStateFromFirestore().then((firestoreState) => {
+      setAppState(prev => {
+        const merged: AppState = {
+          ...prev,
+          settings: firestoreState.settings || prev.settings,
+          products: firestoreState.products.length > 0 ? firestoreState.products : prev.products,
+          orders: firestoreState.orders.length > 0 ? firestoreState.orders : prev.orders,
+          affiliates: firestoreState.affiliates.length > 0 ? firestoreState.affiliates : prev.affiliates,
+        };
+        saveAppState(merged);
+        return merged;
+      });
+    }).catch(err => {
+      console.warn('Firestore load initial state notice:', err);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Google Login handler
+  const handleGoogleLogin = async () => {
+    try {
+      const user = await loginWithGoogle();
+      showToast(`স্বাগতম, ${user.displayName || user.email}!`, '👋');
+    } catch (err) {
+      console.error(err);
+      showToast('Google লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।', '⚠️');
+    }
+  };
+
+  // Google Logout handler
+  const handleGoogleLogout = async () => {
+    await logoutUser();
+    showToast('লগআউট সম্পন্ন হয়েছে', '👋');
   };
 
   // Referral tracking on mount
@@ -127,6 +190,41 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Trigger Combo Package (350 Taka) Transaction Page
+  const handleOpenComboTransaction = () => {
+    let comboProduct = appState.products.find(p => p.id === 'combo_apps_350');
+    const comboPrice = appState.settings.courseConfig?.comboPackage?.price || 350;
+    const comboTitle = appState.settings.courseConfig?.comboPackage?.title || 'Gemini Pro + CapCut Pro VIP Combo Package';
+    const comboSubTitle = appState.settings.courseConfig?.comboPackage?.subTitle || 'Course Videos + Apps Combo (2 Apps Full Access)';
+
+    if (!comboProduct) {
+      comboProduct = {
+        id: 'combo_apps_350',
+        type: 'bundle',
+        title: comboTitle,
+        subTitle: comboSubTitle,
+        price: comboPrice,
+        rawPrice: 850,
+        resellerPrice: 280,
+        commission: 70,
+        status: 'published',
+        accessMode: 'credentials_auto',
+        includesBundle: true,
+        includedCredentials: DEFAULT_CREDENTIALS
+      };
+    } else {
+      comboProduct = {
+        ...comboProduct,
+        price: comboPrice,
+        title: comboTitle,
+        subTitle: comboSubTitle
+      };
+    }
+    setSelectedProduct(comboProduct);
+    setCurrentView('checkout');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Trigger App Transaction Page
   const handleOpenAppTransaction = (app: AppItem) => {
     setSelectedProduct(app);
@@ -134,7 +232,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Order Confirmed Callback
+  // Order Confirmed Callback with Firebase persistence
   const handleOrderConfirmed = (order: Order) => {
     // 1. Add order to store
     const updatedOrders = [order, ...appState.orders];
@@ -144,7 +242,7 @@ export default function App() {
     if (order.affiliateCode && order.affiliateCode !== 'Direct') {
       updatedAffiliates = appState.affiliates.map(a => {
         if (a.code.toUpperCase() === order.affiliateCode.toUpperCase()) {
-          return {
+          const updatedA = {
             ...a,
             ordersCount: (a.ordersCount || 0) + 1,
             wallet: {
@@ -152,6 +250,8 @@ export default function App() {
               pending: a.wallet.pending + (order.commission || 0)
             }
           };
+          saveAffiliateToFirestore(updatedA).catch(e => console.warn('Affiliate save error:', e));
+          return updatedA;
         }
         return a;
       });
@@ -169,6 +269,11 @@ export default function App() {
 
     handleUpdateState(nextState);
 
+    // Persist order in Firebase Firestore
+    saveOrderToFirestore(order, currentUser?.uid).catch(e => 
+      console.warn('Firestore order save error:', e)
+    );
+
     // 3. Forward to Telegram
     forwardOrderToTelegram(order, appState.settings);
 
@@ -179,7 +284,7 @@ export default function App() {
       amount: order.amount
     });
 
-    showToast('পেমেন্ট সফল! ক্রেডেনশিয়াল আনলক হয়েছে।', '🎉');
+    showToast('পেমেন্ট সফল! ক্রেডেনশিয়াল আনলক হয়েছে ও Firebase এ সংরক্ষিত হয়েছে।', '🎉');
   };
 
   const handleToggleLanguage = () => {
@@ -189,7 +294,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white w-full overflow-x-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white">
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -198,33 +303,33 @@ export default function App() {
         </div>
       )}
 
-      {/* Header with Desktop Navigation and Mobile Quick CTA */}
+      {/* Header */}
       <Header
-        activeView={currentView}
-        onNavigate={(view) => {
-          if (view === 'home') setCurrentView('home');
-          else if (view === 'apps') setCurrentView('apps');
-          else if (view === 'portal') setCurrentView('portal');
-          else if (view === 'affiliate-login') {
-            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
-          }
-        }}
-        onCourseClick={handleOpenCourseTransaction}
         onLogoClick={() => setCurrentView('home')}
         onOpenMenu={() => setIsDrawerOpen(true)}
         whatsappGroupLink={appState.settings.whatsappGroupLink}
-        onToggleLanguage={handleToggleLanguage}
-      />
-
-      {/* Side Drawer for Mobile Off-Canvas Navigation */}
-      <SideDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
+        currentView={currentView}
         onNavigate={(view) => {
           if (view === 'home') setCurrentView('home');
           else if (view === 'apps') setCurrentView('apps');
           else if (view === 'course_detail') setCurrentView('course_detail');
           else if (view === 'portal') setCurrentView('portal');
+          else if (view === 'affiliate-login') {
+            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          }
+        }}
+        onCourseTransactionClick={handleOpenCourseTransaction}
+        currentUser={currentUser}
+        onLoginGoogle={handleGoogleLogin}
+        onLogoutGoogle={handleGoogleLogout}
+      />
+
+      {/* Side Drawer strictly 5 items in English */}
+      <SideDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(view) => {
+          if (view === 'home') setCurrentView('home');
           else if (view === 'affiliate-login') {
             setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
           } else if (view === 'partner-login') {
@@ -233,18 +338,17 @@ export default function App() {
             setCurrentView(adminAuth ? 'admin-panel' : 'admin-login');
           }
         }}
-        onCourseClick={handleOpenCourseTransaction}
         onToggleLanguage={handleToggleLanguage}
       />
 
-      {/* Fluid Main Content Area (Mobile to Desktop) */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 lg:pb-12">
+      {/* Main Content Area: Responsive max-w for Mobile & Computer */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-3 sm:p-5 md:p-6 pb-24 md:pb-12">
         {/* VIEW 1: HOME */}
         {currentView === 'home' && (
           <HomePage
             products={appState.products}
             settings={appState.settings}
-            onGetCourseClick={handleOpenCourseTransaction}
+            onGetCourseClick={() => setCurrentView('course_detail')}
             onAppBuyClick={handleOpenAppTransaction}
             onViewCourseDetail={() => setCurrentView('course_detail')}
             onBecomeAffiliateClick={() => setCurrentView('affiliate-login')}
@@ -257,8 +361,8 @@ export default function App() {
           <AppsPage
             products={appState.products}
             onBuyClick={(app) => {
-              if (app.id === 'course_ai_bundle') {
-                handleOpenCourseTransaction();
+              if (app.id === 'course_ai_bundle' || app.id === 'combo_apps_350') {
+                handleOpenComboTransaction();
               } else {
                 handleOpenAppTransaction(app);
               }
@@ -266,11 +370,12 @@ export default function App() {
           />
         )}
 
-        {/* VIEW 3: COURSE DETAIL & SYLLABUS */}
+        {/* VIEW 3: COURSE DETAIL & SYLLABUS (Free Course Page + 350 Taka Combo Apps) */}
         {currentView === 'course_detail' && (
           <CoursePage
             settings={appState.settings}
-            onBuyCourseBundle={handleOpenCourseTransaction}
+            onBuyCourseBundle={handleOpenComboTransaction}
+            onBuyCombo={handleOpenComboTransaction}
             onBuyApp={(appId) => {
               const target = appState.products.find(p => p.id === appId);
               if (target) handleOpenAppTransaction(target);
@@ -298,6 +403,8 @@ export default function App() {
             orders={appState.orders}
             onStartCourse={() => setCurrentView('course_detail')}
             showToast={showToast}
+            currentUser={currentUser}
+            onLoginGoogle={handleGoogleLogin}
           />
         )}
 
@@ -323,34 +430,35 @@ export default function App() {
             onUpdateState={handleUpdateState}
             onLogout={() => {
               setActiveAffiliate(null);
-              setActiveAffiliateId(null);
+              setActiveAffiliateId('');
               setCurrentView('home');
-              showToast('অ্যাফিলিয়েট লগআউট সফল', '👋');
+              showToast('অ্যাফিলিয়েট লগআউট সম্পন্ন!', '👋');
             }}
             showToast={showToast}
           />
         )}
 
-        {/* VIEW 8: PARTNER ADMIN AUTH */}
+        {/* VIEW 8: PARTNER LEADER AUTH */}
         {currentView === 'partner-login' && (
           <PartnerAuthPage
             appState={appState}
             onLoginSuccess={(partner) => {
               setActivePartner(partner);
               setActivePartnerId(partner.id);
-              showToast(`স্বাগতম পার্টনার অ্যাডমিন ${partner.name}!`, '👑');
-              setCurrentView('admin-panel');
+              showToast(`স্বাগতম পার্টনার লিডার ${partner.name}!`, '👑');
             }}
             showToast={showToast}
           />
         )}
 
-        {/* VIEW 9: ADMIN LOGIN PANEL */}
+        {/* VIEW 9: ADMIN LOGIN PAGE */}
         {currentView === 'admin-login' && (
           <AdminLoginPage
             onSuccess={() => {
               setAdminAuth(true);
+              setAdminLoggedIn(true);
               setCurrentView('admin-panel');
+              showToast('এডমিন লগইন সফল!', '🛡️');
             }}
             showToast={showToast}
           />
@@ -365,59 +473,57 @@ export default function App() {
               setAdminAuth(false);
               setAdminLoggedIn(false);
               setCurrentView('home');
-              showToast('অ্যাডমিন প্যানেল থেকে লগআউট সফল', '👋');
+              showToast('এডমিন লগআউট সম্পন্ন!', '👋');
             }}
             showToast={showToast}
           />
         )}
       </main>
 
-      {/* Floating Bottom Navigation Bar */}
+      {/* Floating Bottom Navigation Bar (Screenshots 1-3) */}
       <BottomNav
-        activeTab={currentView === 'checkout' && selectedProduct.id === 'course_ai_bundle' ? 'checkout_course' : currentView}
+        activeTab={currentView}
         onTabChange={(tab) => {
           if (tab === 'home') setCurrentView('home');
           else if (tab === 'apps') setCurrentView('apps');
+          else if (tab === 'course_detail') setCurrentView('course_detail');
           else if (tab === 'portal') setCurrentView('portal');
+          else if (tab === 'affiliate') {
+            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          }
         }}
-        onCourseTransactionClick={handleOpenCourseTransaction}
+        onCourseTransactionClick={handleOpenComboTransaction}
       />
 
-      {/* Automated Credentials Modal (Gemini Pro + CapCut Pro + Course Access) */}
+      {/* Automated Credentials Modal for Gemini Pro & CapCut Pro */}
       <CredentialsModal
         isOpen={credentialsModal.isOpen}
         onClose={() => setCredentialsModal({ isOpen: false })}
-        credentials={selectedProduct.includedCredentials || DEFAULT_CREDENTIALS}
         orderId={credentialsModal.orderId}
-        amount={credentialsModal.amount || 399}
+        credentials={DEFAULT_CREDENTIALS}
+        amount={credentialsModal.amount}
         onGoToPortal={() => {
           setCredentialsModal({ isOpen: false });
           setCurrentView('portal');
         }}
       />
 
-      {/* Video Masterclass Player Modal */}
+      {/* Video Lecture Modal */}
       <VideoPlayerModal
         isOpen={videoModal.isOpen}
-        onClose={() => setVideoModal({ ...videoModal, isOpen: false })}
         videoId={videoModal.videoId}
         title={videoModal.title}
+        onClose={() => setVideoModal({ ...videoModal, isOpen: false })}
       />
 
-      {/* AI Assistant with Bengali Greeting & Voice/Chat Support */}
+      {/* Floating Bengali AI Assistant */}
       <AiAssistant
         products={appState.products}
         whatsappNumber={appState.settings.whatsappNumber}
         onOpenCourseTransaction={handleOpenCourseTransaction}
         onOpenAppTransaction={handleOpenAppTransaction}
-        onNavigateToApps={() => {
-          setCurrentView('apps');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onNavigateToPortal={() => {
-          setCurrentView('portal');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
+        onNavigateToApps={() => setCurrentView('apps')}
+        onNavigateToPortal={() => setCurrentView('portal')}
       />
     </div>
   );

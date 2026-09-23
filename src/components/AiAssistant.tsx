@@ -224,7 +224,7 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
   };
 
   return (
-    <div className="fixed bottom-20 right-3 sm:bottom-24 sm:right-6 lg:bottom-6 lg:right-6 z-40 flex flex-col items-end">
+    <div className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 md:right-8 z-40 flex flex-col items-end">
       {/* 1. INITIAL ENTRANCE GREETING BUBBLE (Visible on website entrance) */}
       {!isOpen && showGreetingBubble && (
         <div className="relative mb-2.5 max-w-[280px] sm:max-w-xs bg-white/95 backdrop-blur-md border-2 border-emerald-400 rounded-2xl p-3.5 shadow-2xl animate-bounce-once transition-all duration-300">
@@ -439,13 +439,13 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
                 if (e.key === 'Enter') handleSendQuery();
               }}
               placeholder={isListening ? 'শুনছি... বলুন...' : 'অ্যাপ বা কোর্স সম্পর্কে লিখুন...'}
-              className="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3 min-h-[44px] text-[16px] sm:text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="flex-1 bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
 
             <button
               onClick={() => handleSendQuery()}
               disabled={!inputValue.trim() || isLoading}
-              className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl transition-all cursor-pointer shadow-xs disabled:cursor-not-allowed"
+              className="p-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl transition-all cursor-pointer shadow-xs disabled:cursor-not-allowed"
               title="পাঠান"
             >
               <Send className="w-4 h-4" />
@@ -460,7 +460,7 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
           setShowGreetingBubble(false);
           setIsOpen(!isOpen);
         }}
-        className={`group relative min-h-[52px] min-w-[52px] rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center cursor-pointer border-2 ${
+        className={`group relative p-3 sm:p-3.5 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center cursor-pointer border-2 ${
           isOpen
             ? 'bg-slate-900 text-white border-slate-700 scale-95'
             : 'bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white border-emerald-300 hover:scale-105 active:scale-95'

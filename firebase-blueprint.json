@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with Google sign-in details",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "role": { "type": "string", "enum": ["user", "admin", "affiliate"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["uid", "email"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer purchase orders",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "email": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 64 },
+        "productTitle": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "rawPrice": { "type": "number" },
+        "discount": { "type": "number" },
+        "trxId": { "type": "string", "maxLength": 64 },
+        "affiliateCode": { "type": "string", "maxLength": 32 },
+        "commission": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "completed", "cancelled"] },
+        "date": { "type": "string", "maxLength": 64 },
+        "credentials": { "type": "object" }
+      },
+      "required": ["id", "customerName", "phone", "productId", "amount", "trxId", "status"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Digital product or course catalog entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "enum": ["app", "course", "bundle"] },
+        "title": { "type": "string", "maxLength": 100 },
+        "subTitle": { "type": "string", "maxLength": 150 },
+        "price": { "type": "number" },
+        "rawPrice": { "type": "number" },
+        "resellerPrice": { "type": "number" },
+        "commission": { "type": "number" },
+        "status": { "type": "string", "enum": ["published", "coming_soon", "archived"] },
+        "downloadUrl": { "type": "string", "maxLength": 500 }
+      },
+      "required": ["id", "type", "title", "price", "status"]
+    },
+    "Affiliate": {
+      "title": "Affiliate",
+      "description": "Affiliate partner details and wallet stats",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "code": { "type": "string", "maxLength": 32 },
+        "name": { "type": "string", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "email": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["approved", "pending_approval", "suspended"] },
+        "wallet": { "type": "object" },
+        "clicks": { "type": "number" },
+        "ordersCount": { "type": "number" }
+      },
+      "required": ["id", "code", "name", "phone", "status"]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "Withdrawal request by affiliate",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "affiliateCode": { "type": "string", "maxLength": 32 },
+        "name": { "type": "string", "maxLength": 100 },
+        "amount": { "type": "number" },
+        "method": { "type": "string", "maxLength": 32 },
+        "number": { "type": "string", "maxLength": 32 },
+        "status": { "type": "string", "enum": ["pending", "paid", "rejected"] },
+        "date": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "affiliateCode", "amount", "method", "number", "status"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global website settings and bKash numbers",
+      "type": "object",
+      "properties": {
+        "paymentNumber": { "type": "string", "maxLength": 32 },
+        "whatsappNumber": { "type": "string", "maxLength": 32 },
+        "whatsappGroupLink": { "type": "string", "maxLength": 256 },
+        "courseBundlePrice": { "type": "number" },
+        "affiliateJoiningFee": { "type": "number" }
+      },
+      "required": ["paymentNumber", "whatsappNumber", "courseBundlePrice"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin authorization marker",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["admin"] }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles authenticated via Google"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer purchase orders"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Digital products and courses catalog"
+    },
+    "/affiliates/{affiliateId}": {
+      "schema": { "$ref": "#/entities/Affiliate" },
+      "description": "Affiliate partner accounts and wallets"
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": { "$ref": "#/entities/Withdrawal" },
+      "description": "Affiliate balance withdrawal requests"
+    },
+    "/settings/{settingsId}": {
+      "schema": { "$ref": "#/entities/Settings" },
+      "description": "Global website and payment configuration"
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/Admin" },
+      "description": "Admin users authorization collection"
+    }
+  }
+}

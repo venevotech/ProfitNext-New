@@ -1,0 +1,85 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Catch-all default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'newlifebegin2026@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Public Digital Products Catalog
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Global Site Settings (Payment Numbers, Group Links)
+    match /settings/{settingsId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // User Profiles with Google Sign-In
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Orders placed by customers
+    match /orders/{orderId} {
+      allow get: if (isSignedIn() && (resource.data.userId == request.auth.uid || resource.data.email == request.auth.token.email)) || isAdmin();
+      allow list: if (isSignedIn() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if request.resource.data.customerName is string &&
+                       request.resource.data.phone is string &&
+                       request.resource.data.amount is number &&
+                       request.resource.data.trxId is string;
+      allow update, delete: if isAdmin();
+    }
+
+    // Affiliate Partners
+    match /affiliates/{affiliateId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create: if request.resource.data.code is string && request.resource.data.phone is string;
+      allow update: if (isSignedIn() && request.auth.uid == affiliateId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Withdrawals
+    match /withdrawals/{withdrawalId} {
+      allow get: if isAdmin() || (isSignedIn() && resource.data.affiliateCode != null);
+      allow list: if isAdmin();
+      allow create: if request.resource.data.amount is number && request.resource.data.number is string;
+      allow update, delete: if isAdmin();
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

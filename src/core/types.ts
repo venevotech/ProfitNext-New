@@ -74,6 +74,42 @@ export interface PartnerLeader {
   createdAt?: string;
 }
 
+export interface CourseVideoModule {
+  id: string;
+  order: number;
+  title: string;
+  subTitle?: string;
+  videoUrl: string;
+  description?: string;
+  level?: string;
+  topics?: string[];
+}
+
+export interface ComboAppItem {
+  id: string;
+  title: string;
+  description?: string;
+  link: string;
+  buttonText?: string;
+  icon?: string;
+}
+
+export interface CoursePageConfig {
+  headline: string;
+  whatsappGroupLink: string;
+  modules: CourseVideoModule[];
+  comboPackage: {
+    enabled: boolean;
+    title: string;
+    subTitle: string;
+    price: number;
+    rawPrice?: number;
+    buyButtonText: string;
+    badgeText?: string;
+    apps: ComboAppItem[];
+  };
+}
+
 export interface SiteSettings {
   paymentNumber: string;
   whatsappNumber: string;
@@ -91,6 +127,7 @@ export interface SiteSettings {
   l1Rate: number;
   l2Rate: number;
   l3Rate: number;
+  courseConfig?: CoursePageConfig;
 }
 
 export interface Order {

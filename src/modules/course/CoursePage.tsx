@@ -1,319 +1,388 @@
 import React, { useState } from 'react';
-import { Users, ChevronDown, CheckCircle2, Lock, Sparkles, ShoppingBag, ArrowRight, ShieldCheck, Play } from 'lucide-react';
+import { 
+  Users, 
+  ChevronDown, 
+  CheckCircle2, 
+  Sparkles, 
+  ShoppingBag, 
+  Play, 
+  ExternalLink, 
+  Download, 
+  Layers, 
+  Gift, 
+  Check, 
+  Star,
+  Film
+} from 'lucide-react';
 import { SiteSettings } from '../../core/types.ts';
+import { DEFAULT_COURSE_CONFIG } from '../../core/store.ts';
+import { getYouTubeEmbedUrl } from '../../services/youtube.ts';
 
 interface CoursePageProps {
   settings: SiteSettings;
-  onBuyCourseBundle: () => void;
-  onBuyApp: (appId: string) => void;
+  onBuyCourseBundle?: () => void;
+  onBuyCombo: () => void;
+  onBuyApp?: (appId: string) => void;
   showToast: (msg: string, icon?: string) => void;
 }
 
 export const CoursePage: React.FC<CoursePageProps> = ({
   settings,
   onBuyCourseBundle,
+  onBuyCombo,
   onBuyApp,
   showToast
 }) => {
-  const [showTopics1, setShowTopics1] = useState(false);
-  const [showAppsAccordion, setShowAppsAccordion] = useState(false);
-  const [moduleProgress, setModuleProgress] = useState<{ [key: number]: boolean }>({ 1: true });
+  const courseConfig = settings.courseConfig || DEFAULT_COURSE_CONFIG;
+  const modules = courseConfig.modules || DEFAULT_COURSE_CONFIG.modules;
+  const combo = courseConfig.comboPackage || DEFAULT_COURSE_CONFIG.comboPackage;
 
-  const toggleModuleComplete = (num: number) => {
-    setModuleProgress(prev => {
-      const next = { ...prev, [num]: !prev[num] };
-      showToast(next[num] ? `মডিউল ${num} সম্পন্ন হয়েছে!` : `মডিউল ${num} অসম্পন্ন`, '📚');
+  // Track expanded topics per module
+  const [expandedTopics, setExpandedTopics] = useState<{ [key: string]: boolean }>({});
+  // Track completed modules
+  const [completedModules, setCompletedModules] = useState<{ [key: string]: boolean }>({});
+
+  const toggleTopics = (modId: string) => {
+    setExpandedTopics(prev => ({ ...prev, [modId]: !prev[modId] }));
+  };
+
+  const toggleComplete = (modId: string, modTitle: string) => {
+    setCompletedModules(prev => {
+      const next = { ...prev, [modId]: !prev[modId] };
+      showToast(next[modId] ? `${modTitle} সম্পন্ন হয়েছে!` : `${modTitle} অসম্পন্ন চিহ্নিত`, '📚');
       return next;
     });
   };
 
+  // Split modules into before combo (e.g. Module 1, 2) and after combo (e.g. Module 3)
+  const modulesBeforeCombo = modules.slice(0, 2);
+  const modulesAfterCombo = modules.slice(2);
+
   return (
-    <div className="space-y-6 pb-6 w-full max-w-7xl mx-auto">
-      {/* Heading section with fluid typography */}
-      <div className="text-center space-y-2">
-        <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider">
-          প্রফেশনাল স্কিল ডেভেলপমেন্ট
-        </span>
-        <h1 className="text-emerald-600 font-black text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center leading-snug tracking-tight">
-          AI দিয়ে ভিডিও বানিয়ে ইনকামের যাত্রা শুরু করুন
+    <div className="space-y-6 pb-6 max-w-4xl mx-auto">
+      {/* 1. Header with FREE Course Banner */}
+      <div className="text-center space-y-3 px-2 pt-1">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black shadow-xs animate-pulse">
+          <Gift className="w-3.5 h-3.5 text-emerald-600" />
+          <span>১০০% ফ্রি কোর্স — কোনো ফি ছাড়াই শিখুন</span>
+        </div>
+
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 leading-snug tracking-tight">
+          {courseConfig.headline || 'AI দিয়ে ভিডিও বানিয়ে ইনকামের যাত্রা শুরু করুন। (সম্পূর্ণ ফ্রি কোর্স)'}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-600 max-w-xl mx-auto">
-          সহজ বাংলায় সম্পূর্ণ প্র্যাকটিক্যাল গাইডলাইন। জেমিনি প্রো ও ক্যাপকাট প্রো ব্যবহার করে প্রফেশনাল কনটেন্ট তৈরি ও আর্নিং।
+
+        <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          নিচের প্রতিটি ভিডিও লেকচার সম্পূর্ণ উন্মুক্ত। আপনি ফ্রিতে দেখে শিখতে পারেন। প্রফেশনাল কাজের সুবিধার্থে এআই অ্যাপসগুলোর ভিআইপি এক্সেস কম্বো প্যাকেজে নিতে পারেন।
         </p>
+
+        {/* WhatsApp VIP Community Button */}
+        <div className="flex justify-center pt-1">
+          <a
+            href={courseConfig.whatsappGroupLink || settings.whatsappGroupLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-full flex items-center gap-2 shadow-sm transition-all transform active:scale-95"
+          >
+            <Users className="w-4 h-4" />
+            <span>Join WhatsApp Group (VIP Community)</span>
+          </a>
+        </div>
       </div>
 
-      {/* Responsive Main Layout: Desktop 2-Column, Mobile Stacked */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        {/* LEFT COLUMN: Video Modules & Interactive Syllabus (8 cols on lg) */}
-        <div className="lg:col-span-8 space-y-5">
-          {/* MODULE 1 (Hands-on Video & Lessons) */}
-          <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <div className="flex items-center gap-2.5">
-                <span className="bg-emerald-600 text-white text-xs font-black px-2.5 py-1 rounded-lg">
-                  01
-                </span>
-                <span className="font-extrabold text-base text-slate-900">
-                  Course Module - 1: AI Content & Video Creation
-                </span>
-              </div>
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                Beginner to Advanced
-              </span>
-            </div>
+      {/* 2. MODULES BEFORE COMBO (Module 1 & Module 2) */}
+      <div className="space-y-5">
+        {modulesBeforeCombo.map((mod, index) => {
+          const isExpanded = !!expandedTopics[mod.id];
+          const isDone = !!completedModules[mod.id];
+          const embedUrl = getYouTubeEmbedUrl(mod.videoUrl);
 
-            {/* Fluid Video Player */}
-            <div className="w-full aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden mb-4 shadow-sm">
-              <iframe
-                src="https://www.youtube.com/embed/Hf0Mvc_eKos?rel=0"
-                title="Module 1 Video"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-              শিখুন Gemini Pro এবং CapCut Pro ব্যবহার করে AI দিয়ে আকর্ষণীয় ভিডিও তৈরি করে কিভাবে ঘরে বসেই আয় করবেন।
-            </p>
-
-            {/* Action Buttons (Min 44px touch targets) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
-                onClick={() => setShowTopics1(!showTopics1)}
-                className="min-h-[44px] py-2.5 px-4 bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
-              >
-                <span>লেসন সিলেবাস দেখুন</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showTopics1 ? 'rotate-180' : ''}`} />
-              </button>
-
-              <button
-                onClick={() => toggleModuleComplete(1)}
-                className={`min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  moduleProgress[1]
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                }`}
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                <span>{moduleProgress[1] ? 'মডিউল সম্পন্ন ✓' : 'সম্পন্ন মার্ক করুন'}</span>
-              </button>
-            </div>
-
-            {/* Syllabus Breakdown */}
-            {showTopics1 && (
-              <div className="mt-4 pt-4 border-t border-dashed border-slate-200 space-y-2.5 text-xs sm:text-sm text-slate-700 animate-in fade-in duration-200">
-                <div className="font-extrabold text-emerald-700 mb-2">মডিউল ১ এর অন্তর্ভুক্ত সকল লেসন:</div>
-                {[
-                  '1. How to create video with Google Flow Pro & AI prompts',
-                  '2. How to find viral trending content to create',
-                  '3. How to source high-res images to create content',
-                  '4. Create viral videos and auto captions & SEO descriptions',
-                  '5. Earning potential, YouTube/FB monetization & affiliate setup'
-                ].map((lesson, idx) => (
-                  <div key={idx} className="flex items-center gap-2.5 p-2 bg-slate-50 rounded-xl border border-slate-100">
-                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 text-xs font-black flex items-center justify-center shrink-0">
-                      {idx + 1}
-                    </span>
-                    <span className="font-medium text-slate-800">{lesson}</span>
+          return (
+            <div 
+              key={mod.id} 
+              className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300"
+            >
+              {/* Module Header */}
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-emerald-600 text-white text-xs font-black px-2.5 py-0.5 rounded-lg">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
+                      {mod.title}
+                    </h3>
+                    {mod.subTitle && (
+                      <span className="text-[11px] text-slate-500 font-medium block">
+                        {mod.subTitle}
+                      </span>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Expandable Accordion for Apps inside Course */}
-            <div className="mt-4 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-2xl p-3.5">
-              <div
-                onClick={() => setShowAppsAccordion(!showAppsAccordion)}
-                className="flex items-center justify-between cursor-pointer min-h-[36px]"
-              >
-                <span className="text-xs sm:text-sm font-bold text-slate-800">
-                  ক্লিক করুন এবং জেমিনি প্রো ও ক্যাপকাট প্রো আলাদা নিন
-                </span>
-                <div className={`w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center transition-transform ${showAppsAccordion ? 'rotate-180' : ''}`}>
-                  <ChevronDown className="w-4 h-4" />
                 </div>
+
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                  {mod.level || 'Free Video'}
+                </span>
               </div>
 
-              {showAppsAccordion && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-200">
-                  <div
-                    onClick={() => onBuyApp('gemini_pro')}
-                    className="bg-white border border-purple-200 rounded-xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-xs hover:border-purple-400 transition-all"
-                  >
-                    <div className="flex items-center gap-1 font-bold text-xs sm:text-sm text-purple-700">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Gemini Pro</span>
-                    </div>
-                    <div className="text-[11px] text-slate-500">Google AI Pro সাবস্ক্রিপশন</div>
-                    <div className="mt-2 bg-emerald-500 text-white text-xs font-black py-1.5 px-4 rounded-full">
-                      350 টাকা
-                    </div>
+              {/* Free Responsive Video Player */}
+              <div className="w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden mb-3 shadow-md border border-slate-900">
+                {embedUrl ? (
+                  <iframe
+                    src={embedUrl}
+                    title={mod.title}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2">
+                    <Play className="w-8 h-8 opacity-50" />
+                    <span className="text-xs">ভিডিও লিঙ্ক লোড হচ্ছে...</span>
                   </div>
+                )}
+              </div>
 
-                  <div
-                    onClick={() => onBuyApp('capcut_pro')}
-                    className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col items-center justify-center text-center cursor-pointer shadow-xs hover:border-slate-400 transition-all"
+              {/* Description */}
+              {mod.description && (
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-3">
+                  {mod.description}
+                </p>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                {mod.topics && mod.topics.length > 0 && (
+                  <button
+                    onClick={() => toggleTopics(mod.id)}
+                    className="flex-1 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <div className="font-black text-xs sm:text-sm text-slate-900">👑 CAPCUT PRO</div>
-                    <div className="text-[11px] text-slate-500">প্রফেশনাল ভিডিও এডিটিং</div>
-                    <div className="mt-2 bg-emerald-500 text-white text-xs font-black py-1.5 px-4 rounded-full">
-                      99 টাকা
+                    <span>সিলেবাস দেখুন ({mod.topics.length} পাঠ)</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                )}
+
+                <button
+                  onClick={() => toggleComplete(mod.id, mod.title)}
+                  className={`flex-1 py-2 px-3 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    isDone
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{isDone ? 'দেখা সম্পন্ন ✓' : 'দেখা শেষ হলে চাপুন'}</span>
+                </button>
+              </div>
+
+              {/* Syllabus Breakdown Accordion */}
+              {isExpanded && mod.topics && (
+                <div className="mt-3 pt-3 border-t border-dashed border-slate-200 space-y-1.5 text-xs text-slate-700">
+                  <div className="font-bold text-emerald-700 text-xs mb-1.5">এই মডিউলে যা শিখবেন:</div>
+                  {mod.topics.map((topic, i) => (
+                    <div key={i} className="flex items-start gap-2 p-1.5 bg-slate-50 rounded-lg">
+                      <span className="text-emerald-600 font-bold shrink-0">{i + 1}.</span>
+                      <span className="leading-snug">{topic}</span>
                     </div>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
-          </div>
+          );
+        })}
+      </div>
 
-          {/* MODULE 2: CAPCUT VIDEO EDITING */}
-          <div className="bg-white border border-slate-200 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xs">
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <div className="flex items-center gap-2.5">
-                <span className="bg-emerald-600 text-white text-xs font-black px-2.5 py-1 rounded-lg">
-                  02
-                </span>
-                <span className="font-extrabold text-base text-slate-900">
-                  Course Module - 2: CapCut Video Editing Masterclass
-                </span>
-              </div>
-              <span className="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
-                Intermediate
-              </span>
+      {/* 3. COMBO PACKAGE OF 350 TAKA (Course Videos + Apps) */}
+      <section className="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 border-2 border-emerald-500/70 rounded-3xl p-4 sm:p-6 md:p-7 text-white shadow-xl relative overflow-hidden">
+        {/* Glow ambient background decoration */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Top Header */}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-white/10">
+          <div>
+            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-400 text-slate-950 text-[11px] font-black tracking-wide uppercase mb-1.5">
+              <Star className="w-3 h-3 fill-slate-950" />
+              <span>{combo.badgeText || 'কম্বো অফার'}</span>
             </div>
-
-            <div className="w-full aspect-video bg-black rounded-xl sm:rounded-2xl overflow-hidden mb-4 shadow-sm">
-              <iframe
-                src="https://www.youtube.com/embed/EvpXW7qpong?rel=0"
-                title="Capcut Video Editing Course"
-                className="w-full h-full border-0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-              স্মার্টফোন ও পিসি দিয়ে প্রফেশনাল ক্যাপকাট ভিডিও এডিটিং এর পূর্ণাঙ্গ স্টেপ-বাই-স্টেপ হ্যান্ডস-অন টিউটোরিয়াল।
-            </p>
-
-            <button
-              onClick={() => toggleModuleComplete(2)}
-              className={`w-full min-h-[44px] py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                moduleProgress[2]
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-              }`}
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>{moduleProgress[2] ? 'মডিউল সম্পন্ন ✓' : 'সম্পন্ন মার্ক করুন'}</span>
-            </button>
-          </div>
-
-          {/* MODULES 3: ADVANCED MONETIZATION (COMING SOON) */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl sm:rounded-3xl p-5 text-center">
-            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <span className="bg-slate-400 text-white text-xs font-black px-2.5 py-1 rounded-lg">
-                  03
-                </span>
-                <span className="font-extrabold text-sm sm:text-base text-slate-700">
-                  Course Module - 3: Advanced AI Monetization
-                </span>
-              </div>
-              <span className="text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5" />
-                <span>Locked</span>
-              </span>
-            </div>
-
-            <div className="h-24 bg-slate-900 text-white rounded-xl sm:rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-inner">
-              <div className="text-base sm:text-lg font-bold">ভিডিও ৩ — পরবর্তী আপডেটে উন্মুক্ত হবে</div>
-              <span className="text-[10px] tracking-widest font-black text-slate-400 uppercase bg-slate-800 px-3 py-1 rounded-full">
-                COMING SOON
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN: Sticky Bundle Offer Card (৳399) & VIP Community (4 cols on lg) */}
-        <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-20">
-          <div className="bg-white border-2 border-emerald-400 rounded-2xl sm:rounded-3xl p-5 sm:p-6 shadow-md">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider mb-3">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>SPECIAL BUNDLE OFFER</span>
-            </div>
-
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-snug">
-              AI কোর্স + Gemini Pro + CapCut Pro
+            <h2 className="text-lg sm:text-xl md:text-2xl font-black text-white tracking-tight">
+              {combo.title || 'Course Videos + Apps Combo Package'}
             </h2>
-
-            <div className="my-3 flex items-baseline gap-2">
-              <span className="text-3xl sm:text-4xl font-black text-emerald-600">৳৩৯৯</span>
-              <span className="text-sm line-through text-slate-400 font-semibold">৳৯৯৯</span>
-              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                ৬০% ছাড়
-              </span>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-              পেমেন্ট কনফার্মেশনের পরপরই পাবেন পুরো কোর্স মেটেরিয়াল, Gemini Pro এবং CapCut Pro এর লাইফটাইম লগইন অ্যাক্সেস।
+            <p className="text-xs sm:text-sm text-emerald-200/90 mt-0.5">
+              {combo.subTitle || '১ ও ২ নং প্রিমিয়াম অ্যাপস একসাথে মাত্র ৩৫০ টাকায় পান'}
             </p>
-
-            {/* Feature List */}
-            <div className="space-y-2 mb-5 text-xs text-slate-700">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>ফুল ভিডিও কোর্স ও মেটেরিয়ালস</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Gemini Pro পার্সোনাল সাবস্ক্রিপশন</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>CapCut Pro আনলিমিটেড ভিআইপি অ্যাক্সেস</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>স্বয়ংক্রিয় পাসওয়ার্ড ও কাস্টমার পোর্টাল</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-teal-600 shrink-0" />
-                <span>২৪/৭ ডেডিকেটেড সাপোর্ট</span>
-              </div>
-            </div>
-
-            {/* Primary Buy CTA */}
-            <button
-              onClick={onBuyCourseBundle}
-              className="w-full min-h-[48px] bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-black text-sm sm:text-base py-3 px-6 rounded-xl sm:rounded-full shadow-lg shadow-emerald-500/30 transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>৳৩৯৯ এ এখনই কিনুন</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
 
-          {/* WhatsApp VIP Community Card */}
-          <div className="bg-slate-900 text-white rounded-2xl sm:rounded-3xl p-5 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-              <Users className="w-4 h-4" />
-              <span>VIP শিক্ষার্থী কমিউনিটি</span>
+          <div className="flex sm:flex-col items-baseline sm:items-end justify-between sm:justify-center gap-1 shrink-0">
+            <span className="text-xs text-slate-400 line-through">
+              ৳{combo.rawPrice || 850}
+            </span>
+            <div className="text-2xl sm:text-3xl font-black text-amber-300">
+              ৳{combo.price || 350}
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              সরাসরি মেন্টরদের সাথে প্রশ্ন ও ভিডিও সমস্যার সমাধান পেতে আমাদের অফিশিয়াল হোয়াটসঅ্যাপ গ্রুপে যুক্ত হোন।
-            </p>
-            <a
-              href={settings.whatsappGroupLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <Users className="w-4 h-4" />
-              <span>Join WhatsApp Group</span>
-            </a>
           </div>
         </div>
+
+        {/* Apps List (1 & 2 Apps) */}
+        <div className="relative z-10 py-5 grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          {combo.apps.map((app, idx) => (
+            <div
+              key={app.id || idx}
+              className="bg-white/5 border border-white/10 hover:border-emerald-400/50 rounded-2xl p-3.5 sm:p-4 backdrop-blur-xs flex flex-col justify-between transition-all"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold text-xs flex items-center justify-center shrink-0 border border-emerald-500/30">
+                    {idx + 1}
+                  </span>
+                  <h4 className="font-extrabold text-sm text-white leading-tight">
+                    {app.title}
+                  </h4>
+                </div>
+
+                {app.description && (
+                  <p className="text-xs text-slate-300 pl-8 leading-relaxed mb-3">
+                    {app.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Direct Access Link / Button */}
+              <div className="pl-8 pt-1">
+                <a
+                  href={app.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 hover:text-amber-200 underline underline-offset-4 transition-colors"
+                >
+                  <span>{app.buttonText || 'সরাসরি লিঙ্ক দেখুন'}</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Single Purchase Button (350 Taka Combo) */}
+        <div className="relative z-10 pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 bg-emerald-900/40 p-4 rounded-2xl border border-emerald-500/40">
+          <div className="text-center sm:text-left">
+            <span className="font-extrabold text-sm sm:text-base text-white block">
+              উভয় অ্যাপস আনলক করতে চান?
+            </span>
+            <span className="text-xs text-emerald-200/80">
+              এক ক্লিকে bKash/Nagad এ ৩৫০ টাকা পাঠিয়ে ফুল অ্যাক্সেস পান
+            </span>
+          </div>
+
+          <button
+            onClick={onBuyCombo}
+            className="w-full sm:w-auto bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm sm:text-base py-3 px-6 rounded-full shadow-lg hover:shadow-amber-400/20 transition-all transform active:scale-95 cursor-pointer flex items-center justify-center gap-2 shrink-0"
+          >
+            <ShoppingBag className="w-4 h-4 text-slate-950" />
+            <span>{combo.buyButtonText || '৳৩৫০ টাকায় কম্বো প্যাকেজ কিনুন ⚡'}</span>
+          </button>
+        </div>
+      </section>
+
+      {/* 4. MODULES AFTER COMBO (Module 3 & Subsequent Modules) */}
+      <div className="space-y-5">
+        {modulesAfterCombo.map((mod, index) => {
+          const isExpanded = !!expandedTopics[mod.id];
+          const isDone = !!completedModules[mod.id];
+          const embedUrl = getYouTubeEmbedUrl(mod.videoUrl);
+          const moduleNumber = modulesBeforeCombo.length + index + 1;
+
+          return (
+            <div 
+              key={mod.id} 
+              className="bg-white border border-slate-200 rounded-3xl p-4 sm:p-5 shadow-xs transition-all hover:border-slate-300"
+            >
+              {/* Module Header */}
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-emerald-600 text-white text-xs font-black px-2.5 py-0.5 rounded-lg">
+                    {String(moduleNumber).padStart(2, '0')}
+                  </span>
+                  <div>
+                    <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
+                      {mod.title}
+                    </h3>
+                    {mod.subTitle && (
+                      <span className="text-[11px] text-slate-500 font-medium block">
+                        {mod.subTitle}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+                  {mod.level || 'Free Video'}
+                </span>
+              </div>
+
+              {/* Free Responsive Video Player */}
+              <div className="w-full aspect-video bg-slate-950 rounded-2xl overflow-hidden mb-3 shadow-md border border-slate-900">
+                {embedUrl ? (
+                  <iframe
+                    src={embedUrl}
+                    title={mod.title}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-2">
+                    <Play className="w-8 h-8 opacity-50" />
+                    <span className="text-xs">ভিডিও লিঙ্ক লোড হচ্ছে...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              {mod.description && (
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-3">
+                  {mod.description}
+                </p>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                {mod.topics && mod.topics.length > 0 && (
+                  <button
+                    onClick={() => toggleTopics(mod.id)}
+                    className="flex-1 py-2 px-3 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span>সিলেবাস দেখুন ({mod.topics.length} পাঠ)</span>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                )}
+
+                <button
+                  onClick={() => toggleComplete(mod.id, mod.title)}
+                  className={`flex-1 py-2 px-3 rounded-full font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                    isDone
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{isDone ? 'দেখা সম্পন্ন ✓' : 'দেখা শেষ হলে চাপুন'}</span>
+                </button>
+              </div>
+
+              {/* Syllabus Breakdown Accordion */}
+              {isExpanded && mod.topics && (
+                <div className="mt-3 pt-3 border-t border-dashed border-slate-200 space-y-1.5 text-xs text-slate-700">
+                  <div className="font-bold text-emerald-700 text-xs mb-1.5">এই মডিউলে যা শিখবেন:</div>
+                  {mod.topics.map((topic, i) => (
+                    <div key={i} className="flex items-start gap-2 p-1.5 bg-slate-50 rounded-lg">
+                      <span className="text-emerald-600 font-bold shrink-0">{i + 1}.</span>
+                      <span className="leading-snug">{topic}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
