@@ -189,7 +189,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white w-full overflow-x-hidden">
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 border border-slate-700 animate-in fade-in slide-in-from-top-2 duration-200">
@@ -198,19 +198,33 @@ export default function App() {
         </div>
       )}
 
-      {/* Header */}
+      {/* Header with Desktop Navigation and Mobile Quick CTA */}
       <Header
+        activeView={currentView}
+        onNavigate={(view) => {
+          if (view === 'home') setCurrentView('home');
+          else if (view === 'apps') setCurrentView('apps');
+          else if (view === 'portal') setCurrentView('portal');
+          else if (view === 'affiliate-login') {
+            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          }
+        }}
+        onCourseClick={handleOpenCourseTransaction}
         onLogoClick={() => setCurrentView('home')}
         onOpenMenu={() => setIsDrawerOpen(true)}
         whatsappGroupLink={appState.settings.whatsappGroupLink}
+        onToggleLanguage={handleToggleLanguage}
       />
 
-      {/* Side Drawer strictly 5 items in English */}
+      {/* Side Drawer for Mobile Off-Canvas Navigation */}
       <SideDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onNavigate={(view) => {
           if (view === 'home') setCurrentView('home');
+          else if (view === 'apps') setCurrentView('apps');
+          else if (view === 'course_detail') setCurrentView('course_detail');
+          else if (view === 'portal') setCurrentView('portal');
           else if (view === 'affiliate-login') {
             setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
           } else if (view === 'partner-login') {
@@ -219,11 +233,12 @@ export default function App() {
             setCurrentView(adminAuth ? 'admin-panel' : 'admin-login');
           }
         }}
+        onCourseClick={handleOpenCourseTransaction}
         onToggleLanguage={handleToggleLanguage}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-lg w-full mx-auto p-3 sm:p-4 pb-24">
+      {/* Fluid Main Content Area (Mobile to Desktop) */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 lg:pb-12">
         {/* VIEW 1: HOME */}
         {currentView === 'home' && (
           <HomePage

@@ -7,9 +7,47 @@
   --color-lemon-light: #ECFCCB;
 }
 
-body {
+html, body {
+  width: 100%;
+  min-width: 320px;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
   font-family: var(--primary-font);
   background-color: #f8fafc;
   color: #111827;
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Fluid media */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure minimum touch target on mobile buttons & interactive elements */
+@media (max-width: 768px) {
+  button, a, input, select, textarea {
+    touch-action: manipulation;
+  }
+}
+
+/* Responsive typography utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users } from 'lucide-react';
+import { Users, ShieldCheck } from 'lucide-react';
 import { AppState, PartnerLeader } from '../../core/types.ts';
 
 interface PartnerAuthPageProps {
@@ -32,22 +32,22 @@ export const PartnerAuthPage: React.FC<PartnerAuthPageProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto py-2 px-1">
-      <div className="text-center mb-4">
-        <div className="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
-          <Users className="w-6 h-6" />
+    <div className="w-full max-w-md mx-auto py-6 sm:py-10 px-3 sm:px-4">
+      <div className="text-center mb-6">
+        <div className="w-14 h-14 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xs">
+          <Users className="w-7 h-7" />
         </div>
-        <h1 className="text-xl sm:text-2xl font-black text-slate-900">
-          Partner Admin Login
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          Partner Leader Portal
         </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">
           টিম লিডার ও পার্টনার ম্যানেজমেন্ট ড্যাশবোর্ড
         </p>
       </div>
 
-      <form onSubmit={handleLogin} className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <form onSubmit={handleLogin} className="space-y-4 bg-white p-5 sm:p-7 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-xs">
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
+          <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">
             পার্টনার কোড অথবা মোবাইল:
           </label>
           <input
@@ -56,12 +56,12 @@ export const PartnerAuthPage: React.FC<PartnerAuthPageProps> = ({
             value={phoneOrCode}
             onChange={(e) => setPhoneOrCode(e.target.value)}
             placeholder="LEAD101 বা 01789123456"
-            className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-500 outline-none"
+            className="w-full min-h-[48px] px-4 bg-slate-50 border border-slate-200 rounded-xl text-[16px] sm:text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-400"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">
+          <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1.5">
             পাসওয়ার্ড:
           </label>
           <input
@@ -70,19 +70,20 @@ export const PartnerAuthPage: React.FC<PartnerAuthPageProps> = ({
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="পাসওয়ার্ড দিন"
-            className="w-full h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-indigo-500 outline-none"
+            className="w-full min-h-[48px] px-4 bg-slate-50 border border-slate-200 rounded-xl text-[16px] sm:text-sm font-semibold focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-400"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-colors"
+          className="w-full min-h-[48px] bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-black text-sm sm:text-base rounded-xl shadow-md shadow-indigo-600/20 cursor-pointer transition-all mt-2"
         >
-          পার্টনার লগইন ↗
+          পার্টনার প্যানেলে প্রবেশ করুন ↗
         </button>
 
-        <div className="text-center pt-2 text-xs text-slate-500">
-          ডেমো পার্টনার: <code className="font-bold text-indigo-700">LEAD101 / 123456</code>
+        <div className="pt-2 text-center text-xs text-slate-400 flex items-center justify-center gap-1.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <span>সুরক্ষিত টিম লিডার অথেন্টিকেশন</span>
         </div>
       </form>
     </div>
