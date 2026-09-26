@@ -47,7 +47,6 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
   onNavigateToPortal
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showGreetingBubble, setShowGreetingBubble] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: 'msg_welcome',
@@ -146,9 +145,6 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
     const text = (textToSend || inputValue).trim();
     if (!text || isLoading) return;
 
-    // Hide greeting bubble once conversation starts
-    setShowGreetingBubble(false);
-
     const userMsg: ChatMessage = {
       id: `usr_${Date.now()}`,
       role: 'user',
@@ -225,62 +221,7 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
 
   return (
     <div className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 md:right-8 z-40 flex flex-col items-end">
-      {/* 1. INITIAL ENTRANCE GREETING BUBBLE (Visible on website entrance) */}
-      {!isOpen && showGreetingBubble && (
-        <div className="relative mb-2.5 max-w-[280px] sm:max-w-xs bg-white/95 backdrop-blur-md border-2 border-emerald-400 rounded-2xl p-3.5 shadow-2xl animate-bounce-once transition-all duration-300">
-          {/* Close tiny button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowGreetingBubble(false);
-            }}
-            className="absolute -top-2 -right-2 w-5 h-5 bg-slate-200 hover:bg-slate-300 text-slate-600 rounded-full flex items-center justify-center text-xs cursor-pointer shadow-xs"
-            title="বন্ধ করুন"
-          >
-            <X className="w-3 h-3" />
-          </button>
-
-          {/* Greeting content */}
-          <div 
-            onClick={() => {
-              setShowGreetingBubble(false);
-              setIsOpen(true);
-            }}
-            className="cursor-pointer space-y-1.5"
-          >
-            <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-xs uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 animate-spin" />
-              <span>ProfitNext AI Assistant</span>
-            </div>
-
-            <p className="text-slate-900 font-extrabold text-sm leading-snug">
-              Assalamulaikum sir kivabe sahajjo korte pari? 👋
-            </p>
-
-            <p className="text-slate-600 text-[11px] leading-relaxed">
-              আসসালামু আলাইকুম স্যার! ৩৯৯ টাকার কোর্স বান্ডেল বা যেকোনো অ্যাপস সম্পর্কে জানতে ক্লিক করুন।
-            </p>
-
-            {/* Quick action chips on bubble */}
-            <div className="pt-1 flex flex-wrap gap-1">
-              <span className="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                🔥 ৳৩৯৯ কোর্স
-              </span>
-              <span className="inline-block bg-sky-100 text-sky-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                🤖 Gemini Pro
-              </span>
-              <span className="inline-block bg-purple-100 text-purple-800 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                🎬 CapCut Pro
-              </span>
-            </div>
-          </div>
-
-          {/* Tooltip triangle indicator */}
-          <div className="absolute -bottom-2 right-6 w-3 h-3 bg-white border-r-2 border-b-2 border-emerald-400 transform rotate-45"></div>
-        </div>
-      )}
-
-      {/* 2. CHAT WINDOW / MODAL */}
+      {/* 1. CHAT WINDOW / MODAL (Appears when someone clicks on the bot) */}
       {isOpen && (
         <div className="w-[92vw] sm:w-[380px] max-w-md h-[520px] max-h-[78vh] bg-white rounded-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden mb-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
           {/* Header */}
@@ -454,18 +395,16 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
         </div>
       )}
 
-      {/* 3. FLOATING TRIGGER BUTTON */}
+      {/* 2. FLOATING TRIGGER BUTTON */}
       <button
-        onClick={() => {
-          setShowGreetingBubble(false);
-          setIsOpen(!isOpen);
-        }}
+        onClick={() => setIsOpen(!isOpen)}
         className={`group relative p-3 sm:p-3.5 rounded-full shadow-2xl transition-all duration-300 flex items-center justify-center cursor-pointer border-2 ${
           isOpen
             ? 'bg-slate-900 text-white border-slate-700 scale-95'
             : 'bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white border-emerald-300 hover:scale-105 active:scale-95'
         }`}
-        title="ProfitNext AI Assistant"
+        title="ProfitNext AI Assistant (ক্লিক করে চ্যাট শুরু করুন)"
+        aria-label="ProfitNext AI Assistant"
       >
         {isOpen ? (
           <X className="w-6 h-6" />

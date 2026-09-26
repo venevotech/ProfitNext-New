@@ -98,7 +98,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <button
               onClick={onGetCourseClick}
-              className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2.5 px-6 rounded-full shadow-md shadow-emerald-500/25 transition-all cursor-pointer"
+              className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2.5 px-6 rounded-full shadow-md shadow-emerald-500/25 transition-all cursor-pointer btn-shimmer"
             >
               কোর্স ও ভিডিও দেখুন ⚡
             </button>
