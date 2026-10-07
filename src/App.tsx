@@ -37,9 +37,115 @@ import {
 } from './services/firebase.ts';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
+// URL Path Routing Helpers
+export function getPathForView(view: string): string {
+  switch (view) {
+    case 'home':
+      return '/';
+    case 'apps':
+      return '/apps';
+    case 'course_detail':
+      return '/course';
+    case 'pro-unlock':
+      return '/pro-unlock';
+    case 'coursera-plus':
+      return '/coursera-plus';
+    case 'checkout':
+      return '/checkout';
+    case 'portal':
+      return '/portal';
+    case 'affiliate-login':
+      return '/affiliate-login';
+    case 'affiliate-dashboard':
+      return '/affiliate-dashboard';
+    case 'partner-login':
+      return '/partner-login';
+    case 'admin-login':
+      return '/admin-login';
+    case 'admin-panel':
+      return '/admin-panel';
+    default:
+      return `/${view}`;
+  }
+}
+
+export function getViewFromPath(pathname: string): string {
+  const clean = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (!clean || clean === 'home') return 'home';
+  if (clean === 'apps') return 'apps';
+  if (clean === 'course' || clean === 'course-detail' || clean === 'course_detail' || clean === 'courses') return 'course_detail';
+  if (clean === 'pro-unlock' || clean === 'prounlock' || clean === 'pro-unlock-method') return 'pro-unlock';
+  if (clean === 'coursera-plus' || clean === 'courseraplus' || clean === 'coursera') return 'coursera-plus';
+  if (clean === 'checkout') return 'checkout';
+  if (clean === 'portal') return 'portal';
+  if (clean === 'affiliate' || clean === 'affiliate-login') return 'affiliate-login';
+  if (clean === 'affiliate-dashboard') return 'affiliate-dashboard';
+  if (clean === 'partner' || clean === 'partner-login') return 'partner-login';
+  if (clean === 'admin' || clean === 'admin-login') return 'admin-login';
+  if (clean === 'admin-panel') return 'admin-panel';
+  return 'home';
+}
+
 export default function App() {
   const [appState, setAppState] = useState<AppState>(() => loadAppState());
-  const [currentView, setCurrentView] = useState<string>('home');
+  const [currentView, setCurrentView] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return getViewFromPath(window.location.pathname);
+    }
+    return 'home';
+  });
+
+  const navigateToView = (view: string, replace = false) => {
+    setCurrentView(view);
+    if (typeof window !== 'undefined') {
+      const targetPath = getPathForView(view);
+      const search = window.location.search || '';
+      const newUrl = targetPath === '/' ? (search ? `/${search}` : '/') : `${targetPath}${search}`;
+      
+      if (window.location.pathname !== targetPath) {
+        if (replace) {
+          window.history.replaceState({ view }, '', newUrl);
+        } else {
+          window.history.pushState({ view }, '', newUrl);
+        }
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Sync with browser Back and Forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const matchedView = getViewFromPath(window.location.pathname);
+      setCurrentView(matchedView);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Sync browser document title based on current view
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const titleMap: Record<string, string> = {
+        'home': 'ProfitNext — Digital Apps & Course Platform',
+        'apps': 'All Premium Apps — ProfitNext',
+        'course_detail': 'AI Video Earning Masterclass — ProfitNext',
+        'pro-unlock': 'Pro Unlock Method (Secret Tricks) — ProfitNext',
+        'coursera-plus': 'Coursera Plus (7000+ Courses & Certificates) — ProfitNext',
+        'checkout': 'Secure Checkout & Payment — ProfitNext',
+        'portal': 'Customer Portal — ProfitNext',
+        'affiliate-login': 'Affiliate Program — ProfitNext',
+        'affiliate-dashboard': 'Affiliate Dashboard — ProfitNext',
+        'partner-login': 'Partner Portal — ProfitNext',
+        'admin-login': 'Admin Login — ProfitNext',
+        'admin-panel': 'Admin Dashboard — ProfitNext'
+      };
+      if (titleMap[currentView]) {
+        document.title = titleMap[currentView];
+      }
+    }
+  }, [currentView]);
   const [selectedProduct, setSelectedProduct] = useState<AppItem>(() => {
     return loadAppState().products.find(p => p.id === 'course_ai_bundle') || loadAppState().products[0];
   });
@@ -188,7 +294,7 @@ export default function App() {
       courseBundle.price = 399; // Ensure strictly 399 Taka
     }
     setSelectedProduct(courseBundle);
-    setCurrentView('checkout');
+    navigateToView('checkout');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -223,14 +329,14 @@ export default function App() {
       };
     }
     setSelectedProduct(comboProduct);
-    setCurrentView('checkout');
+    navigateToView('checkout');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Trigger App Transaction Page
   const handleOpenAppTransaction = (app: AppItem) => {
     setSelectedProduct(app);
-    setCurrentView('checkout');
+    navigateToView('checkout');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -307,19 +413,15 @@ export default function App() {
 
       {/* Header */}
       <Header
-        onLogoClick={() => setCurrentView('home')}
+        onLogoClick={() => navigateToView('home')}
         onOpenMenu={() => setIsDrawerOpen(true)}
         whatsappGroupLink={appState.settings.whatsappGroupLink}
         currentView={currentView}
         onNavigate={(view) => {
-          if (view === 'home') setCurrentView('home');
-          else if (view === 'apps') setCurrentView('apps');
-          else if (view === 'course_detail') setCurrentView('course_detail');
-          else if (view === 'portal') setCurrentView('portal');
-          else if (view === 'pro-unlock') setCurrentView('pro-unlock');
-          else if (view === 'coursera-plus') setCurrentView('coursera-plus');
-          else if (view === 'affiliate-login') {
-            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          if (view === 'affiliate-login') {
+            navigateToView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          } else {
+            navigateToView(view);
           }
         }}
         onCourseTransactionClick={handleOpenCourseTransaction}
@@ -333,18 +435,14 @@ export default function App() {
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onNavigate={(view) => {
-          if (view === 'home') setCurrentView('home');
-          else if (view === 'apps') setCurrentView('apps');
-          else if (view === 'course_detail') setCurrentView('course_detail');
-          else if (view === 'portal') setCurrentView('portal');
-          else if (view === 'pro-unlock') setCurrentView('pro-unlock');
-          else if (view === 'coursera-plus') setCurrentView('coursera-plus');
-          else if (view === 'affiliate-login') {
-            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          if (view === 'affiliate-login') {
+            navigateToView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
           } else if (view === 'partner-login') {
-            setCurrentView('partner-login');
+            navigateToView('partner-login');
           } else if (view === 'admin-login') {
-            setCurrentView(adminAuth ? 'admin-panel' : 'admin-login');
+            navigateToView(adminAuth ? 'admin-panel' : 'admin-login');
+          } else {
+            navigateToView(view);
           }
         }}
         onToggleLanguage={handleToggleLanguage}
@@ -357,10 +455,10 @@ export default function App() {
           <HomePage
             products={appState.products}
             settings={appState.settings}
-            onGetCourseClick={() => setCurrentView('course_detail')}
+            onGetCourseClick={() => navigateToView('course_detail')}
             onAppBuyClick={handleOpenAppTransaction}
-            onViewCourseDetail={() => setCurrentView('course_detail')}
-            onBecomeAffiliateClick={() => setCurrentView('affiliate-login')}
+            onViewCourseDetail={() => navigateToView('course_detail')}
+            onBecomeAffiliateClick={() => navigateToView('affiliate-login')}
             onPlayPreviewVideo={(ytId) => setVideoModal({ isOpen: true, videoId: ytId, title: 'AI Video Masterclass' })}
           />
         )}
@@ -401,7 +499,7 @@ export default function App() {
             affiliates={appState.affiliates}
             coupons={appState.coupons}
             onOrderSuccess={handleOrderConfirmed}
-            onBackToCatalog={() => setCurrentView('home')}
+            onBackToCatalog={() => navigateToView('home')}
             showToast={showToast}
           />
         )}
@@ -410,7 +508,7 @@ export default function App() {
         {currentView === 'portal' && (
           <CustomerPortal
             orders={appState.orders}
-            onStartCourse={() => setCurrentView('course_detail')}
+            onStartCourse={() => navigateToView('course_detail')}
             showToast={showToast}
             currentUser={currentUser}
             onLoginGoogle={handleGoogleLogin}
@@ -425,7 +523,7 @@ export default function App() {
             onLoginSuccess={(aff) => {
               setActiveAffiliate(aff);
               setActiveAffiliateId(aff.id);
-              setCurrentView('affiliate-dashboard');
+              navigateToView('affiliate-dashboard');
             }}
             showToast={showToast}
           />
@@ -440,7 +538,7 @@ export default function App() {
             onLogout={() => {
               setActiveAffiliate(null);
               setActiveAffiliateId('');
-              setCurrentView('home');
+              navigateToView('home');
               showToast('অ্যাফিলিয়েট লগআউট সম্পন্ন!', '👋');
             }}
             showToast={showToast}
@@ -466,7 +564,7 @@ export default function App() {
             onSuccess={() => {
               setAdminAuth(true);
               setAdminLoggedIn(true);
-              setCurrentView('admin-panel');
+              navigateToView('admin-panel');
               showToast('এডমিন লগইন সফল!', '🛡️');
             }}
             showToast={showToast}
@@ -481,7 +579,7 @@ export default function App() {
             onLogout={() => {
               setAdminAuth(false);
               setAdminLoggedIn(false);
-              setCurrentView('home');
+              navigateToView('home');
               showToast('এডমিন লগআউট সম্পন্ন!', '👋');
             }}
             showToast={showToast}
@@ -503,7 +601,7 @@ export default function App() {
             settings={appState.settings}
             onOrderSuccess={handleOrderConfirmed}
             showToast={showToast}
-            onNavigateHome={() => setCurrentView('home')}
+            onNavigateHome={() => navigateToView('home')}
           />
         )}
       </main>
@@ -512,12 +610,10 @@ export default function App() {
       <BottomNav
         activeTab={currentView}
         onTabChange={(tab) => {
-          if (tab === 'home') setCurrentView('home');
-          else if (tab === 'apps') setCurrentView('apps');
-          else if (tab === 'course_detail') setCurrentView('course_detail');
-          else if (tab === 'portal') setCurrentView('portal');
-          else if (tab === 'affiliate') {
-            setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          if (tab === 'affiliate') {
+            navigateToView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
+          } else {
+            navigateToView(tab);
           }
         }}
         onCourseTransactionClick={handleOpenComboTransaction}
@@ -532,7 +628,7 @@ export default function App() {
         amount={credentialsModal.amount}
         onGoToPortal={() => {
           setCredentialsModal({ isOpen: false });
-          setCurrentView('portal');
+          navigateToView('portal');
         }}
       />
 
@@ -550,10 +646,10 @@ export default function App() {
         whatsappNumber={appState.settings.whatsappNumber}
         onOpenCourseTransaction={handleOpenCourseTransaction}
         onOpenAppTransaction={handleOpenAppTransaction}
-        onNavigateToApps={() => setCurrentView('apps')}
-        onNavigateToPortal={() => setCurrentView('portal')}
-        onNavigateToProUnlock={() => setCurrentView('pro-unlock')}
-        onNavigateToCourseraPlus={() => setCurrentView('coursera-plus')}
+        onNavigateToApps={() => navigateToView('apps')}
+        onNavigateToPortal={() => navigateToView('portal')}
+        onNavigateToProUnlock={() => navigateToView('pro-unlock')}
+        onNavigateToCourseraPlus={() => navigateToView('coursera-plus')}
       />
     </div>
   );
