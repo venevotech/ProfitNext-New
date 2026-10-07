@@ -95,8 +95,9 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
         {/* Navigation Items (All touch targets >= 44px) */}
         <nav className="flex flex-col gap-1.5 py-4 flex-1">
           {/* Pro Unlock Method (Secret Tricks) - Requested by User */}
-          <button
-            onClick={() => { onNavigate('pro-unlock'); onClose(); }}
+          <a
+            href="#pro-unlock"
+            onClick={(e) => { e.preventDefault(); onNavigate('pro-unlock'); onClose(); }}
             className="min-h-[50px] flex items-center gap-3 px-3 py-2.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 text-amber-950 hover:from-amber-100 hover:to-orange-100 font-extrabold text-sm transition-all text-left cursor-pointer shadow-xs mb-1"
           >
             <span className="p-2 rounded-xl bg-amber-400 text-slate-950 shrink-0 shadow-xs">
@@ -113,35 +114,39 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
                 Pro Unlock Method (Secret Tricks) 🔑
               </div>
             </div>
-          </button>
+          </a>
 
-          <button
-            onClick={() => { onNavigate('home'); onClose(); }}
+          <a
+            href="/"
+            onClick={(e) => { e.preventDefault(); onNavigate('home'); onClose(); }}
             className="min-h-[48px] flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-sm transition-all text-left cursor-pointer"
           >
             <span className="p-2 rounded-lg bg-emerald-100 text-emerald-700"><Home className="w-4 h-4" /></span>
             <span>Home Page</span>
-          </button>
+          </a>
 
-          <button
-            onClick={() => { onNavigate('apps'); onClose(); }}
+          <a
+            href="#apps"
+            onClick={(e) => { e.preventDefault(); onNavigate('apps'); onClose(); }}
             className="min-h-[48px] flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-sm transition-all text-left cursor-pointer"
           >
             <span className="p-2 rounded-lg bg-emerald-100 text-emerald-700"><Smartphone className="w-4 h-4" /></span>
             <span>All Premium Apps</span>
-          </button>
+          </a>
 
-          <button
-            onClick={() => { onNavigate('course_detail'); onClose(); }}
+          <a
+            href="#course"
+            onClick={(e) => { e.preventDefault(); onNavigate('course_detail'); onClose(); }}
             className="min-h-[48px] flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-sm transition-all text-left cursor-pointer"
           >
             <span className="p-2 rounded-lg bg-purple-100 text-purple-700"><GraduationCap className="w-4 h-4" /></span>
             <span>Course Syllabus & Overview</span>
-          </button>
+          </a>
 
           {/* Coursera Plus Course Page (1499 BDT) - Requested by User */}
-          <button
-            onClick={() => { onNavigate('coursera-plus'); onClose(); }}
+          <a
+            href="#coursera-plus"
+            onClick={(e) => { e.preventDefault(); onNavigate('coursera-plus'); onClose(); }}
             className="min-h-[48px] flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-blue-900 bg-blue-50/80 hover:bg-blue-100 hover:text-blue-950 font-bold text-sm transition-all text-left cursor-pointer border border-blue-200/70 shadow-2xs"
           >
             <span className="p-2 rounded-lg bg-blue-600 text-white shadow-2xs"><GraduationCap className="w-4 h-4" /></span>
@@ -156,23 +161,25 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
                 7,000+ Courses & Certificates
               </div>
             </div>
-          </button>
+          </a>
 
-          <button
-            onClick={() => { onNavigate('portal'); onClose(); }}
+          <a
+            href="#portal"
+            onClick={(e) => { e.preventDefault(); onNavigate('portal'); onClose(); }}
             className="min-h-[48px] flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-sm transition-all text-left cursor-pointer"
           >
             <span className="p-2 rounded-lg bg-blue-100 text-blue-700"><ShieldCheck className="w-4 h-4" /></span>
             <span>Customer Learning Portal</span>
-          </button>
+          </a>
 
-          <button
-            onClick={() => { onNavigate('affiliate-login'); onClose(); }}
+          <a
+            href="#affiliate-login"
+            onClick={(e) => { e.preventDefault(); onNavigate('affiliate-login'); onClose(); }}
             className="min-h-[48px] flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 font-bold text-sm transition-all text-left cursor-pointer"
           >
             <span className="p-2 rounded-lg bg-amber-100 text-amber-700"><Briefcase className="w-4 h-4" /></span>
             <span>Affiliate Partner Dashboard</span>
-          </button>
+          </a>
 
           <button
             onClick={() => { onNavigate('partner-login'); onClose(); }}

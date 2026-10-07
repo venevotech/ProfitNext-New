@@ -193,28 +193,48 @@ export const ProUnlockPage: React.FC<ProUnlockPageProps> = ({
             এই মেথডের মাধ্যমে আপনি অফিসিয়াল ট্রিকস ব্যবহার করে আনলিমিটেড এআই ও প্রিমিয়াম সফটওয়্যার আনলক করতে পারবেন অথবা অন্যদের কাছে রিসেল করে আকর্ষণীয় আয় করতে পারবেন।
           </p>
 
-          {/* Quick status pill */}
-          <div className="pt-1 flex items-center gap-2">
-            {isUnlocked ? (
-              <span className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">
-                <Unlock className="w-3.5 h-3.5 text-emerald-400" />
-                <span>স্ট্যাটাস: আনলকড (Unlocked) ✅</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-bold px-3 py-1 rounded-full">
-                <Lock className="w-3.5 h-3.5 text-amber-400" />
-                <span>স্ট্যাটাস: লক করা (Locked) 🔒</span>
-              </span>
-            )}
-            {isUnlocked && (
+          {/* Quick status pill & Shareable Link */}
+          <div className="pt-1 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              {isUnlocked ? (
+                <span className="inline-flex items-center gap-1.5 bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full">
+                  <Unlock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>স্ট্যাটাস: আনলকড (Unlocked) ✅</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-bold px-3 py-1 rounded-full">
+                  <Lock className="w-3.5 h-3.5 text-amber-400" />
+                  <span>স্ট্যাটাস: লক করা (Locked) 🔒</span>
+                </span>
+              )}
+              {isUnlocked && (
+                <button
+                  onClick={handleLockAgain}
+                  className="text-xs text-slate-400 hover:text-white underline cursor-pointer transition-colors"
+                  title="লক করুন"
+                >
+                  আবার লক করুন
+                </button>
+              )}
+            </div>
+
+            {/* Direct Link Badge */}
+            <div className="flex items-center gap-1.5 bg-black/40 border border-amber-400/30 px-2.5 py-1 rounded-full text-xs">
+              <span className="text-amber-300 font-bold text-[11px]">🔗 পেজ লিংক:</span>
+              <code className="text-amber-200 font-mono text-[11px]">#pro-unlock</code>
               <button
-                onClick={handleLockAgain}
-                className="text-xs text-slate-400 hover:text-white underline cursor-pointer transition-colors"
-                title="লক করুন"
+                onClick={() => {
+                  const url = typeof window !== 'undefined' ? `${window.location.origin}/#pro-unlock` : 'https://profitnext.com/#pro-unlock';
+                  navigator.clipboard.writeText(url);
+                  showToast('Pro Unlock মেথড পেজ লিংক কপি হয়েছে! 📋');
+                }}
+                className="ml-1 text-[11px] bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-2 py-0.5 rounded-full cursor-pointer transition-transform active:scale-95 flex items-center gap-1"
+                title="কপি লিংক"
               >
-                আবার লক করুন
+                <Copy className="w-3 h-3" />
+                <span>কপি</span>
               </button>
-            )}
+            </div>
           </div>
         </div>
       </div>

@@ -37,7 +37,7 @@ import {
 } from './services/firebase.ts';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
-// URL Path Routing Helpers
+// URL Path & Hash Routing Helpers
 export function getPathForView(view: string): string {
   switch (view) {
     case 'home':
@@ -69,20 +69,63 @@ export function getPathForView(view: string): string {
   }
 }
 
-export function getViewFromPath(pathname: string): string {
-  const clean = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-  if (!clean || clean === 'home') return 'home';
-  if (clean === 'apps') return 'apps';
-  if (clean === 'course' || clean === 'course-detail' || clean === 'course_detail' || clean === 'courses') return 'course_detail';
-  if (clean === 'pro-unlock' || clean === 'prounlock' || clean === 'pro-unlock-method') return 'pro-unlock';
-  if (clean === 'coursera-plus' || clean === 'courseraplus' || clean === 'coursera') return 'coursera-plus';
-  if (clean === 'checkout') return 'checkout';
-  if (clean === 'portal') return 'portal';
-  if (clean === 'affiliate' || clean === 'affiliate-login') return 'affiliate-login';
-  if (clean === 'affiliate-dashboard') return 'affiliate-dashboard';
-  if (clean === 'partner' || clean === 'partner-login') return 'partner-login';
-  if (clean === 'admin' || clean === 'admin-login') return 'admin-login';
-  if (clean === 'admin-panel') return 'admin-panel';
+export function getHashForView(view: string): string {
+  switch (view) {
+    case 'home':
+      return '';
+    case 'apps':
+      return '#apps';
+    case 'course_detail':
+      return '#course';
+    case 'pro-unlock':
+      return '#pro-unlock';
+    case 'coursera-plus':
+      return '#coursera-plus';
+    case 'checkout':
+      return '#checkout';
+    case 'portal':
+      return '#portal';
+    case 'affiliate-login':
+      return '#affiliate-login';
+    case 'affiliate-dashboard':
+      return '#affiliate-dashboard';
+    case 'partner-login':
+      return '#partner-login';
+    case 'admin-login':
+      return '#admin-login';
+    case 'admin-panel':
+      return '#admin-panel';
+    default:
+      return `#${view}`;
+  }
+}
+
+export function getViewFromLocation(pathname: string, hash: string): string {
+  // 1. First prioritize hash (e.g. #pro-unlock, #coursera-plus, #apps, #course)
+  const cleanHash = (hash || '')
+    .replace(/^#+/, '')
+    .replace(/^\/+|\/+$/g, '')
+    .toLowerCase();
+
+  // 2. Then check pathname (e.g. /pro-unlock, /coursera-plus)
+  const cleanPath = (pathname || '')
+    .replace(/^\/+|\/+$/g, '')
+    .toLowerCase();
+
+  const candidate = cleanHash || cleanPath;
+
+  if (!candidate || candidate === 'home') return 'home';
+  if (candidate === 'apps') return 'apps';
+  if (candidate === 'course' || candidate === 'course-detail' || candidate === 'course_detail' || candidate === 'courses') return 'course_detail';
+  if (candidate === 'pro-unlock' || candidate === 'prounlock' || candidate === 'pro-unlock-method' || candidate === 'pro') return 'pro-unlock';
+  if (candidate === 'coursera-plus' || candidate === 'courseraplus' || candidate === 'coursera') return 'coursera-plus';
+  if (candidate === 'checkout') return 'checkout';
+  if (candidate === 'portal') return 'portal';
+  if (candidate === 'affiliate' || candidate === 'affiliate-login') return 'affiliate-login';
+  if (candidate === 'affiliate-dashboard') return 'affiliate-dashboard';
+  if (candidate === 'partner' || candidate === 'partner-login') return 'partner-login';
+  if (candidate === 'admin' || candidate === 'admin-login') return 'admin-login';
+  if (candidate === 'admin-panel') return 'admin-panel';
   return 'home';
 }
 
@@ -90,7 +133,7 @@ export default function App() {
   const [appState, setAppState] = useState<AppState>(() => loadAppState());
   const [currentView, setCurrentView] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return getViewFromPath(window.location.pathname);
+      return getViewFromLocation(window.location.pathname, window.location.hash);
     }
     return 'home';
   });
@@ -99,29 +142,62 @@ export default function App() {
     setCurrentView(view);
     if (typeof window !== 'undefined') {
       const targetPath = getPathForView(view);
+      const targetHash = getHashForView(view);
       const search = window.location.search || '';
-      const newUrl = targetPath === '/' ? (search ? `/${search}` : '/') : `${targetPath}${search}`;
+
+      // Form URL with both Path and Hash so #Pagename always appears in the browser link!
+      // Example: "/pro-unlock#pro-unlock" or "/#pro-unlock"
+      const newUrl = view === 'home'
+        ? (search ? `/${search}` : '/')
+        : `${targetPath}${search}${targetHash}`;
       
-      if (window.location.pathname !== targetPath) {
+      try {
         if (replace) {
           window.history.replaceState({ view }, '', newUrl);
         } else {
           window.history.pushState({ view }, '', newUrl);
         }
+      } catch (_) {
+        // Fallback for sandboxed iframe
+        if (view === 'home') {
+          window.location.hash = '';
+        } else {
+          window.location.hash = targetHash;
+        }
       }
+
+      // Explicitly keep window.location.hash synchronized
+      if (view === 'home') {
+        if (window.location.hash) {
+          try {
+            window.history.replaceState({ view: 'home' }, '', '/' + search);
+          } catch (_) {
+            window.location.hash = '';
+          }
+        }
+      } else if (window.location.hash !== targetHash) {
+        try {
+          window.location.hash = targetHash;
+        } catch (_) {}
+      }
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Sync with browser Back and Forward buttons
+  // Sync with browser Back/Forward (popstate) and Hash changes (hashchange)
   useEffect(() => {
-    const handlePopState = () => {
-      const matchedView = getViewFromPath(window.location.pathname);
+    const handleUrlChange = () => {
+      const matchedView = getViewFromLocation(window.location.pathname, window.location.hash);
       setCurrentView(matchedView);
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
 
   // Sync browser document title based on current view

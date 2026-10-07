@@ -176,20 +176,40 @@ export const CourseraPlusPage: React.FC<CourseraPlusPageProps> = ({
             গুগল (Google), আইবিএম (IBM), মেটা (Meta), স্ট্যানফোর্ড (Stanford) এবং বিশ্বসেরা ৩৫০+ বিশ্ববিদ্যালয়ের অফিসিয়াল কোর্স, স্পেশালাইজেশন ও জব-রেডি প্রফেশনাল সার্টিফিকেট আনলিমিটেড এক্সেস করুন মাত্র <strong>১৪৯৯ BDT</strong> তে!
           </p>
 
-          {/* Quick Badges */}
-          <div className="pt-2 flex flex-wrap gap-2 text-xs">
-            <span className="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-400/30 text-blue-300 px-3 py-1 rounded-full font-semibold">
-              <Award className="w-3.5 h-3.5 text-amber-400" />
-              <span>ভেরিফাইড অফিসিয়াল সার্টিফিকেট</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 px-3 py-1 rounded-full font-semibold">
-              <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-              <span>৭,০০০+ কোর্স আনলিমিটেড</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-400/30 text-amber-300 px-3 py-1 rounded-full font-semibold">
-              <Flame className="w-3.5 h-3.5 text-rose-400" />
-              <span>বিশেষ ছাড়: মাত্র ১৪৯৯ BDT</span>
-            </span>
+          {/* Quick Badges & Shareable Link */}
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 bg-blue-500/10 border border-blue-400/30 text-blue-300 px-3 py-1 rounded-full font-semibold">
+                <Award className="w-3.5 h-3.5 text-amber-400" />
+                <span>ভেরিফাইড অফিসিয়াল সার্টিফিকেট</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 px-3 py-1 rounded-full font-semibold">
+                <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                <span>৭,০০০+ কোর্স আনলিমিটেড</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-400/30 text-amber-300 px-3 py-1 rounded-full font-semibold">
+                <Flame className="w-3.5 h-3.5 text-rose-400" />
+                <span>বিশেষ ছাড়: মাত্র ১৪৯৯ BDT</span>
+              </span>
+            </div>
+
+            {/* Direct Link Badge */}
+            <div className="flex items-center gap-1.5 bg-black/40 border border-blue-400/30 px-2.5 py-1 rounded-full text-xs">
+              <span className="text-blue-300 font-bold text-[11px]">🔗 পেজ লিংক:</span>
+              <code className="text-blue-200 font-mono text-[11px]">#coursera-plus</code>
+              <button
+                onClick={() => {
+                  const url = typeof window !== 'undefined' ? `${window.location.origin}/#coursera-plus` : 'https://profitnext.com/#coursera-plus';
+                  navigator.clipboard.writeText(url);
+                  showToast('Coursera Plus পেজ লিংক কপি হয়েছে! 📋');
+                }}
+                className="ml-1 text-[11px] bg-blue-500 hover:bg-blue-400 text-white font-black px-2 py-0.5 rounded-full cursor-pointer transition-transform active:scale-95 flex items-center gap-1"
+                title="কপি লিংক"
+              >
+                <Copy className="w-3 h-3" />
+                <span>কপি</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

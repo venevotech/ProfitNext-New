@@ -16,8 +16,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     <div className="fixed bottom-3 left-0 right-0 z-40 flex justify-center pointer-events-none px-4 md:hidden">
       <nav className="pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-full flex items-center p-1.5 gap-1 w-full max-w-md">
         {/* Tab 1: ALL (Home) */}
-        <button
-          onClick={() => onTabChange('home')}
+        <a
+          href="/"
+          onClick={(e) => { e.preventDefault(); onTabChange('home'); }}
           className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'home'
               ? 'bg-emerald-50 text-emerald-600'
@@ -26,11 +27,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         >
           <LayoutGrid className="w-5 h-5 mb-0.5" />
           <span>ALL</span>
-        </button>
+        </a>
 
         {/* Tab 2: Apps */}
-        <button
-          onClick={() => onTabChange('apps')}
+        <a
+          href="#apps"
+          onClick={(e) => { e.preventDefault(); onTabChange('apps'); }}
           className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'apps'
               ? 'bg-emerald-50 text-emerald-600'
@@ -39,11 +41,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         >
           <Smartphone className="w-5 h-5 mb-0.5" />
           <span>Apps</span>
-        </button>
+        </a>
 
         {/* Tab 3: Courses -> Opens Free Course & Videos */}
-        <button
-          onClick={() => onTabChange('course_detail')}
+        <a
+          href="#course"
+          onClick={(e) => { e.preventDefault(); onTabChange('course_detail'); }}
           className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full text-xs font-semibold transition-all cursor-pointer relative ${
             activeTab === 'course_detail'
               ? 'bg-emerald-600 text-white shadow-md'
@@ -56,11 +59,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({
           </span>
           <GraduationCap className="w-5 h-5 mb-0.5" />
           <span>Courses</span>
-        </button>
+        </a>
 
         {/* Tab 4: Portal */}
-        <button
-          onClick={() => onTabChange('portal')}
+        <a
+          href="#portal"
+          onClick={(e) => { e.preventDefault(); onTabChange('portal'); }}
           className={`flex-1 flex flex-col items-center justify-center py-2 px-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'portal' || activeTab.startsWith('admin') || activeTab.startsWith('affiliate') || activeTab.startsWith('partner')
               ? 'bg-slate-900 text-white shadow-md'
@@ -69,7 +73,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         >
           <Compass className="w-5 h-5 mb-0.5" />
           <span>Portal ↗</span>
-        </button>
+        </a>
       </nav>
     </div>
   );

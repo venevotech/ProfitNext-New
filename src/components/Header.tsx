@@ -40,8 +40,9 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Desktop Navigation Links (Responsive for Computer Screens) */}
         {onNavigate && (
           <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 p-1 rounded-full text-xs font-bold text-slate-700 shadow-inner">
-            <button
-              onClick={() => onNavigate('home')}
+            <a
+              href="/"
+              onClick={(e) => { e.preventDefault(); onNavigate('home'); }}
               className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
                 currentView === 'home'
                   ? 'bg-white text-emerald-600 shadow-xs font-extrabold'
@@ -49,9 +50,10 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               ALL
-            </button>
-            <button
-              onClick={() => onNavigate('apps')}
+            </a>
+            <a
+              href="#apps"
+              onClick={(e) => { e.preventDefault(); onNavigate('apps'); }}
               className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
                 currentView === 'apps'
                   ? 'bg-white text-emerald-600 shadow-xs font-extrabold'
@@ -59,9 +61,11 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               Apps
-            </button>
-            <button
-              onClick={() => {
+            </a>
+            <a
+              href="#course"
+              onClick={(e) => {
+                e.preventDefault();
                 if (onCourseTransactionClick) {
                   onCourseTransactionClick();
                 } else {
@@ -82,9 +86,10 @@ export const Header: React.FC<HeaderProps> = ({
               }`}>
                 ৳৩৯৯
               </span>
-            </button>
-            <button
-              onClick={() => onNavigate('portal')}
+            </a>
+            <a
+              href="#portal"
+              onClick={(e) => { e.preventDefault(); onNavigate('portal'); }}
               className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
                 currentView === 'portal'
                   ? 'bg-slate-900 text-white shadow-xs font-extrabold'
@@ -92,9 +97,10 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               Portal ↗
-            </button>
-            <button
-              onClick={() => onNavigate('affiliate-login')}
+            </a>
+            <a
+              href="#affiliate-login"
+              onClick={(e) => { e.preventDefault(); onNavigate('affiliate-login'); }}
               className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
                 currentView.includes('affiliate')
                   ? 'bg-white text-emerald-600 shadow-xs font-extrabold'
@@ -102,9 +108,10 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               Affiliate
-            </button>
-            <button
-              onClick={() => onNavigate('pro-unlock')}
+            </a>
+            <a
+              href="#pro-unlock"
+              onClick={(e) => { e.preventDefault(); onNavigate('pro-unlock'); }}
               className={`px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1 ${
                 currentView === 'pro-unlock'
                   ? 'bg-amber-400 text-slate-950 shadow-xs font-black'
@@ -115,9 +122,10 @@ export const Header: React.FC<HeaderProps> = ({
               <Key className="w-3.5 h-3.5" />
               <span>Pro Unlock</span>
               <span className="text-[9px] bg-amber-500 text-slate-950 px-1 rounded-sm font-black">299</span>
-            </button>
-            <button
-              onClick={() => onNavigate('coursera-plus')}
+            </a>
+            <a
+              href="#coursera-plus"
+              onClick={(e) => { e.preventDefault(); onNavigate('coursera-plus'); }}
               className={`px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1 ${
                 currentView === 'coursera-plus'
                   ? 'bg-blue-600 text-white shadow-xs font-black'
@@ -127,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <span>Coursera</span>
               <span className="text-[9px] bg-blue-700 text-white px-1 rounded-sm font-black">1499</span>
-            </button>
+            </a>
           </nav>
         )}
 
