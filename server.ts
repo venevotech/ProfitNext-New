@@ -56,7 +56,18 @@ Platform Catalog & Knowledge:
 5. "Framer Pro":
    - Standalone price: ৳2999
    - Features: Figma to responsive website builder.
-6. Payment & Delivery:
+6. "Pro Unlock Method (Secret Tricks)":
+   - Price: ৳299 (Access via Secret Key 151002055 or ৳299 payment forwarded to admin WhatsApp +8801830086837)
+   - Features: Officially unlock Gemini Pro, ChatGPT Pro, Higgsfield Pro, King AI Pro, Canva Pro, CapCut Pro with Telegram bots & subscription guides.
+7. "Coursera Plus Course & Subscription":
+   - Price: ৳1499 BDT
+   - Features: Unlimited access to 7,000+ courses, specializations and verified degrees/certificates from Google, Meta, IBM, Stanford. Includes YouTube tutorial video (https://youtu.be/ldduzkmASjU).
+8. Mandatory QNA Responses:
+   - When asked "eta die ki chatgpt, gemini.....other tools etc. nite parbo?" (or variations like taking ChatGPT, Gemini, other tools):
+     Answer: "ji sir, apni paid method ar free method e jekono apps/software nite ba kinte parben sobche kom dam e. eto kome paben je sell o korte parben."
+   - When asked "egula sell kivabe korbo?" (or variations about selling these apps):
+     Answer: "apni facebook e ad chalie sell korte parben. amader Ai die video bananor course ta dekhun."
+8. Payment & Delivery:
    - Payment methods: bKash, Nagad, Rocket (Send Money to personal number: 01625449778).
    - Once payment is sent, submit TrxID and phone on checkout page.
    - Automated Delivery: As soon as the order is placed, credentials and links appear immediately in the Automated Credentials Modal and Customer Portal.
@@ -70,6 +81,38 @@ When answering, guide the user to take action (e.g. suggesting they click on the
 // Local domain fallback
 function getLocalFallbackAnswer(query: string): string {
   const q = query.toLowerCase();
+
+  // Specific User QNA 1
+  if (
+    (q.includes('chatgpt') && (q.includes('nite') || q.includes('parbo'))) ||
+    q.includes('other tools') ||
+    q.includes('eta die ki') ||
+    q.includes('tools etc')
+  ) {
+    return 'ji sir, apni paid method ar free method e jekono apps/software nite ba kinte parben sobche kom dam e. eto kome paben je sell o korte parben.';
+  }
+
+  // Specific User QNA 2
+  if (
+    q.includes('sell kivabe') || 
+    q.includes('sell korbo') || 
+    q.includes('kivabe sell') || 
+    q.includes('egula sell') || 
+    q.includes('ad chalie')
+  ) {
+    return 'apni facebook e ad chalie sell korte parben. amader Ai die video bananor course ta dekhun.';
+  }
+
+  // Pro Unlock Method General Query
+  if (q.includes('pro unlock') || q.includes('secret trick') || q.includes('151002055')) {
+    return 'ji sir! Pro Unlock Method (Secret Tricks)-এর মাধ্যমে আপনি নিজেই অফিসিয়ালভাবে আনলক করুন Gemini Pro, Chatgpt Pro, Higgsfeild Pro, King Ai Pro, Canva pro, Capcut pro সাথে আরও অ্যাপস ও সফটওয়্যার। এর প্রাইস মাত্র ৳২৯৯ টাকা। থ্রি ডট মেন্যু থেকে সরাসরি এই পেজে গিয়ে আনলক করতে পারেন!';
+  }
+
+  // Coursera Plus Query
+  if (q.includes('coursera') || q.includes('কোর্সেরা') || q.includes('1499') || q.includes('১৪৯৯')) {
+    return 'ji sir! আমাদের নতুন Coursera Plus কোর্স ও মেম্বারশিপ পেজে আপনি পাচ্ছেন Google, Meta, IBM, Stanford-এর ৭,০০০+ অফিসিয়াল কোর্স ও ভেরিফাইড সার্টিফিকেট সম্পূর্ণ আনলিমিটেড এক্সেস মাত্র ১৪৯৯ BDT-তে! ভিডিও দেখে সরাসরি পপআপ থেকে বিকাশ/নগদে ১৪৯৯ টাকা পেমেন্ট করে অর্ডার করতে পারবেন।';
+  }
+
   if (
     q.includes('assalam') || 
     q.includes('salam') || 

@@ -36,6 +36,8 @@ interface AiAssistantProps {
   onOpenAppTransaction: (app: AppItem) => void;
   onNavigateToApps: () => void;
   onNavigateToPortal: () => void;
+  onNavigateToProUnlock?: () => void;
+  onNavigateToCourseraPlus?: () => void;
 }
 
 export const AiAssistant: React.FC<AiAssistantProps> = ({
@@ -44,7 +46,9 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
   onOpenCourseTransaction,
   onOpenAppTransaction,
   onNavigateToApps,
-  onNavigateToPortal
+  onNavigateToPortal,
+  onNavigateToProUnlock,
+  onNavigateToCourseraPlus
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
@@ -197,6 +201,16 @@ export const AiAssistant: React.FC<AiAssistantProps> = ({
       setIsOpen(false);
     } else if (action.type === 'portal') {
       onNavigateToPortal();
+      setIsOpen(false);
+    } else if (action.type === 'pro-unlock') {
+      if (onNavigateToProUnlock) {
+        onNavigateToProUnlock();
+      }
+      setIsOpen(false);
+    } else if (action.type === 'coursera-plus') {
+      if (onNavigateToCourseraPlus) {
+        onNavigateToCourseraPlus();
+      }
       setIsOpen(false);
     } else if (action.type === 'whatsapp') {
       window.open(`https://wa.me/${whatsappNumber}`, '_blank');

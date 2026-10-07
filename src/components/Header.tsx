@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Menu, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { Users, Menu, MoreVertical, LogIn, LogOut, User as UserIcon, Key } from 'lucide-react';
 import { User } from 'firebase/auth';
 
 interface HeaderProps {
@@ -103,6 +103,31 @@ export const Header: React.FC<HeaderProps> = ({
             >
               Affiliate
             </button>
+            <button
+              onClick={() => onNavigate('pro-unlock')}
+              className={`px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1 ${
+                currentView === 'pro-unlock'
+                  ? 'bg-amber-400 text-slate-950 shadow-xs font-black'
+                  : 'text-amber-800 bg-amber-100/90 hover:bg-amber-200 font-extrabold'
+              }`}
+              title="Pro Unlock Method (Secret Tricks)"
+            >
+              <Key className="w-3.5 h-3.5" />
+              <span>Pro Unlock</span>
+              <span className="text-[9px] bg-amber-500 text-slate-950 px-1 rounded-sm font-black">299</span>
+            </button>
+            <button
+              onClick={() => onNavigate('coursera-plus')}
+              className={`px-3 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1 ${
+                currentView === 'coursera-plus'
+                  ? 'bg-blue-600 text-white shadow-xs font-black'
+                  : 'text-blue-800 bg-blue-100/90 hover:bg-blue-200 font-extrabold'
+              }`}
+              title="Coursera Plus Course & Subscription (৳1499)"
+            >
+              <span>Coursera</span>
+              <span className="text-[9px] bg-blue-700 text-white px-1 rounded-sm font-black">1499</span>
+            </button>
           </nav>
         )}
 
@@ -172,12 +197,14 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="xs:hidden sm:hidden">Group</span>
           </a>
 
+          {/* Three dot menu button (Requested by User) */}
           <button 
             onClick={onOpenMenu}
-            aria-label="Open Menu"
-            className="p-1.5 text-slate-700 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+            aria-label="Three dot menu"
+            title="Three dot menu • Pro Unlock Method"
+            className="p-1.5 text-slate-700 hover:text-emerald-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer flex items-center justify-center border border-transparent hover:border-slate-200"
           >
-            <Menu className="w-6 h-6" />
+            <MoreVertical className="w-5 h-5 sm:w-6 sm:h-6 text-slate-800 hover:text-emerald-600 transition-colors" />
           </button>
         </div>
       </div>

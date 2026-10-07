@@ -21,6 +21,8 @@ import { AffiliateDashboard } from './modules/affiliate/AffiliateDashboard.tsx';
 import { PartnerAuthPage } from './modules/affiliate/PartnerAuthPage.tsx';
 import { AdminLoginPage } from './modules/admin/AdminLoginPage.tsx';
 import { AdminPanel } from './modules/admin/AdminPanel.tsx';
+import { ProUnlockPage } from './modules/pro-unlock/ProUnlockPage.tsx';
+import { CourseraPlusPage } from './modules/course/CourseraPlusPage.tsx';
 import { detectReferralCode } from './services/tracking.ts';
 import { forwardOrderToTelegram } from './services/telegram.ts';
 import { isAdminLoggedIn, setAdminLoggedIn, getActiveAffiliateId, setActiveAffiliateId, getActivePartnerId, setActivePartnerId } from './services/auth.ts';
@@ -314,6 +316,8 @@ export default function App() {
           else if (view === 'apps') setCurrentView('apps');
           else if (view === 'course_detail') setCurrentView('course_detail');
           else if (view === 'portal') setCurrentView('portal');
+          else if (view === 'pro-unlock') setCurrentView('pro-unlock');
+          else if (view === 'coursera-plus') setCurrentView('coursera-plus');
           else if (view === 'affiliate-login') {
             setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
           }
@@ -330,6 +334,11 @@ export default function App() {
         onClose={() => setIsDrawerOpen(false)}
         onNavigate={(view) => {
           if (view === 'home') setCurrentView('home');
+          else if (view === 'apps') setCurrentView('apps');
+          else if (view === 'course_detail') setCurrentView('course_detail');
+          else if (view === 'portal') setCurrentView('portal');
+          else if (view === 'pro-unlock') setCurrentView('pro-unlock');
+          else if (view === 'coursera-plus') setCurrentView('coursera-plus');
           else if (view === 'affiliate-login') {
             setCurrentView(activeAffiliate ? 'affiliate-dashboard' : 'affiliate-login');
           } else if (view === 'partner-login') {
@@ -478,6 +487,25 @@ export default function App() {
             showToast={showToast}
           />
         )}
+
+        {/* VIEW 11: PRO UNLOCK METHOD (SECRET TRICKS) */}
+        {currentView === 'pro-unlock' && (
+          <ProUnlockPage
+            settings={appState.settings}
+            onOrderSuccess={handleOrderConfirmed}
+            showToast={showToast}
+          />
+        )}
+
+        {/* VIEW 12: COURSERA PLUS COURSE PAGE (1499 BDT) */}
+        {currentView === 'coursera-plus' && (
+          <CourseraPlusPage
+            settings={appState.settings}
+            onOrderSuccess={handleOrderConfirmed}
+            showToast={showToast}
+            onNavigateHome={() => setCurrentView('home')}
+          />
+        )}
       </main>
 
       {/* Floating Bottom Navigation Bar (Screenshots 1-3) */}
@@ -524,6 +552,8 @@ export default function App() {
         onOpenAppTransaction={handleOpenAppTransaction}
         onNavigateToApps={() => setCurrentView('apps')}
         onNavigateToPortal={() => setCurrentView('portal')}
+        onNavigateToProUnlock={() => setCurrentView('pro-unlock')}
+        onNavigateToCourseraPlus={() => setCurrentView('coursera-plus')}
       />
     </div>
   );

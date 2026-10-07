@@ -10,7 +10,7 @@ export interface ChatMessage {
   content: string;
   timestamp: number;
   action?: {
-    type: 'course' | 'app' | 'browse_apps' | 'whatsapp' | 'portal';
+    type: 'course' | 'app' | 'browse_apps' | 'whatsapp' | 'portal' | 'pro-unlock' | 'coursera-plus';
     label: string;
     productId?: string;
   };
@@ -18,15 +18,15 @@ export interface ChatMessage {
 
 // Default initial greeting requested by user:
 export const INITIAL_GREETING_TEXT = 
-  "Assalamulaikum sir kivabe sahajjo korte pari? (আসসালামু আলাইকুম স্যার, কিভাবে সাহায্য করতে পারি?) \n\nআমি ProfitNext-এর অফিসিয়াল এআই অ্যাসিস্ট্যান্ট। আমাদের ৩৯৯ টাকার AI Video Earning Masterclass কোর্স বান্ডেল (কোর্স + Gemini Pro + CapCut Pro), কিংবা যেকোনো প্রিমিয়াম ডিজিটাল অ্যাপস সম্পর্কে জানতে আমাকে প্রশ্ন করতে পারেন!";
+  "Assalamulaikum sir kivabe sahajjo korte pari? (আসসালামু আলাইকুম স্যার, কিভাবে সাহায্য করতে পারি?) \n\nআমি ProfitNext-এর অফিসিয়াল এআই অ্যাসিস্ট্যান্ট। আমাদের ৩৯৯ টাকার AI Video Earning Masterclass কোর্স বান্ডেল (কোর্স + Gemini Pro + CapCut Pro), কিংবা Pro Unlock Method (Secret Tricks) সম্পর্কে জানতে আমাকে প্রশ্ন করতে পারেন!";
 
 // Quick question prompts
 export const SUGGESTED_QUESTIONS = [
+  '🔑 eta die ki chatgpt, gemini... nite parbo?',
+  '💰 egula sell kivabe korbo?',
+  '⚡ Pro Unlock Method (Secret Tricks) কী?',
   '🔥 ৩৯৯ টাকার কোর্স বান্ডেলে কী কী আছে?',
-  '🤖 Gemini Pro কিভাবে পাব?',
-  '🎬 CapCut Pro এর দাম ও ফিচার',
-  '💳 পেমেন্ট ও ডেলিভারি প্রক্রিয়া',
-  '📱 কী কী অ্যাপস ও কোর্স আছে?'
+  '🤖 Gemini Pro ও CapCut Pro কিভাবে পাব?'
 ];
 
 /**
@@ -34,6 +34,80 @@ export const SUGGESTED_QUESTIONS = [
  */
 export function getBengaliDomainAnswer(query: string): { reply: string; action?: ChatMessage['action'] } {
   const q = query.toLowerCase().trim();
+
+  // 1. SPECIFIC USER-REQUESTED QNA 1: eta die ki chatgpt, gemini.....other tools etc. nite parbo?
+  if (
+    q.includes('chatgpt') && (q.includes('nite') || q.includes('parbo') || q.includes('paoya') || q.includes('pabo')) ||
+    q.includes('gemini') && q.includes('other tools') ||
+    q.includes('eta die ki') ||
+    q.includes('tools etc') ||
+    q.includes('other tools etc') ||
+    q.includes('অন্যান্য টুলস') ||
+    q.includes('apps software nite')
+  ) {
+    return {
+      reply: 'ji sir, apni paid method ar free method e jekono apps/software nite ba kinte parben sobche kom dam e. eto kome paben je sell o korte parben.',
+      action: {
+        type: 'pro-unlock',
+        label: '👉 Pro Unlock Method (Secret Tricks) দেখুন (৳২৯৯)'
+      }
+    };
+  }
+
+  // 2. SPECIFIC USER-REQUESTED QNA 2: egula sell kivabe korbo?
+  if (
+    q.includes('sell kivabe') || 
+    q.includes('sell korbo') || 
+    q.includes('kivabe sell') || 
+    q.includes('egula sell') || 
+    q.includes('বিক্রি করব কিভাবে') || 
+    q.includes('সেল করব কিভাবে') || 
+    q.includes('ad chalie')
+  ) {
+    return {
+      reply: 'apni facebook e ad chalie sell korte parben. amader Ai die video bananor course ta dekhun.',
+      action: {
+        type: 'course',
+        label: '👉 AI Video Course ও ৩৯৯ বান্ডেল দেখুন',
+        productId: 'course_ai_bundle'
+      }
+    };
+  }
+
+  // 3. Pro Unlock Method General Query
+  if (
+    q.includes('pro unlock') || 
+    q.includes('secret trick') || 
+    q.includes('secret tricks') || 
+    q.includes('সিক্রেট') || 
+    q.includes('151002055') || 
+    q.includes('higgsfield') || 
+    q.includes('king ai')
+  ) {
+    return {
+      reply: 'ji sir! Pro Unlock Method (Secret Tricks)-এর মাধ্যমে আপনি নিজেই অফিসিয়ালভাবে আনলক করতে পারবেন Gemini Pro, ChatGPT Pro, Higgsfield Pro, King AI Pro, Canva Pro, CapCut Pro সহ আরও বহু অ্যাপস ও সফটওয়্যার। এর প্রাইস মাত্র ৳২৯৯ টাকা অথবা আপনার কাছে সিক্রেট কি (151002055) থাকলে সরাসরি পেজে বসিয়ে আনলক করতে পারেন।',
+      action: {
+        type: 'pro-unlock',
+        label: '👉 Pro Unlock Method পেজ খুলুন (৳২৯৯)'
+      }
+    };
+  }
+
+  // 4. Coursera Plus Query
+  if (
+    q.includes('coursera') || 
+    q.includes('কোর্সেরা') || 
+    q.includes('1499') || 
+    q.includes('১৪৯৯')
+  ) {
+    return {
+      reply: 'ji sir! আমাদের নতুন Coursera Plus কোর্স ও মেম্বারশিপ পেজে আপনি পাচ্ছেন Google, Meta, IBM, Stanford-এর ৭,০০০+ অফিসিয়াল কোর্স ও ভেরিফাইড সার্টিফিকেট সম্পূর্ণ আনলিমিটেড এক্সেস মাত্র ১৪৯৯ BDT-তে! ভিডিও দেখে সরাসরি পপআপ থেকে বিকাশ/নগদে ১৪৯৯ টাকা পেমেন্ট করে অর্ডার করতে পারবেন।',
+      action: {
+        type: 'coursera-plus',
+        label: '👉 Coursera Plus কোর্স পেজ দেখুন (৳১৪৯৯)'
+      }
+    };
+  }
 
   // Greetings
   if (
